@@ -24,7 +24,8 @@ done
 if [[ ${#not_installed[@]} -eq 0 ]]; then 
     printf "%s\n" "All Dependencies Installed"
 else 
-    printf "\n%s\n%s\n" "Following programs not installed" "${not_installed[@]}"
+    printf "\n%s\n%s\n" "Following Dependencies not installed" "${not_installed[@]}"
+    echo "Exiting..."
     exit 0
 fi
 
