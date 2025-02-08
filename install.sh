@@ -3,15 +3,14 @@
 CREADER_DIR="$HOME/.config/creader/"
 ADD_TO_USER_PATH="/usr/local/bin"
 
-echo "Cloning repo"
+printf "%s\n" "Cloning Repo..."
 git clone "https://github.com/Hiro427/creader.git"
 
 cd "creader" || exit
 
-echo " "
-echo "Starting Installation..."
+printf "\n%s\n" "Starting Installation..."
 
-echo "Checking Dependencies..."
+printf "%s\n" "Checking Dependencies..."
 dependencies=(chafa gum awk cut sed file find grep tput tr jq sort)
 not_installed=()
 for d in "${dependencies[@]}"; do 
@@ -23,21 +22,22 @@ for d in "${dependencies[@]}"; do
 done 
 
 if [[ ${#not_installed[@]} -eq 0 ]]; then 
-    echo "All Dependencies Install"
+    printf "%s\n" "All Dependencies Installed"
 else 
     printf "\n%s\n%s\n" "Following programs not installed" "${not_installed[@]}"
     exit 0
 fi
 
-echo "Making Directories"
+printf "%s\n" "Making Directories..."
 
 if [[ -e "$CREADER_DIR" ]]; then 
     echo "The PATH: $CREADER_DIR already exists"
-    echo "Skipping installation"
+    echo "Exiting..."
+    exit 0
 else
     mkdir -p "$CREADER_DIR"
     mkdir "${CREADER_DIR}active/"
-    mdkir "${CREADER_DIR}sessions/"
+    mkdir "${CREADER_DIR}sessions/"
     mkdir "${CREADER_DIR}tmp/"
     cp "header.txt" "${CREADER_DIR}"
 
@@ -45,6 +45,10 @@ fi
 
 
 echo "Add creader to path"
-sudo cp "./creader.sh" "$ADD_TO_USER_PATH/creader"
+echo "Command to be run: sudo cp ./creader.sh /usr/local/bin/creader"
 
-echo "Installation Complete"
+gum confirm "Add to Path?" && sudo cp "./creader.sh" "$ADD_TO_USER_PATH/creader" || exit 0
+
+printf "%s\n%s\n" "Installation Complete" "Feel free to delete the cloned directory"
+
+echo "NOTE: If program was not added to path you cannot run it globally"
