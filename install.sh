@@ -47,8 +47,8 @@ fi
 echo "Add creader to path"
 echo "Command to be run: sudo cp ./creader.sh /usr/local/bin/creader"
 
-gum confirm "Add to Path?" && sudo cp "./creader.sh" "$ADD_TO_USER_PATH/creader" || exit 0
+gum confirm "Add to Path?" && sudo cp "./creader.sh" "$ADD_TO_USER_PATH/creader" || echo "Not added to PATH"
 
 printf "%s\n%s\n" "Installation Complete" "Feel free to delete the cloned directory"
 
-echo "NOTE: If program was not added to path you cannot run it globally"
+echo "NOTE: If script was not added to PATH, you won't be able to run it globally"
