@@ -102,9 +102,12 @@ m        - Main Menu
 
     Be sure to read the script before running it!
 
+    You will be prompted for sudo access for the last command in the script, to copy the script to your PATH
+    
     wget "https://raw.githubusercontent.com/Hiro427/creader/refs/heads/main/install.sh" 
     chmod +x install.sh 
     ./install.sh
+    
     
 
 </details>
