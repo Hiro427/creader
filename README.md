@@ -42,9 +42,9 @@ b        - go back to chapter selection for current manga
 </details>
 
 <details>
-<summary>Manga Info Preview PageM</summary>
+<summary>Manga Info Preview Page</summary>
 
-**This is shown when selecting manga to download** 
+###### **This is shown when selecting manga to download** 
 
 ```
 q/Ctrl+c - Quit/Exit
