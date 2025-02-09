@@ -1,8 +1,8 @@
-https://github.com/user-attachments/assets/617da55f-9dc6-4fc8-9eb4-c02ceb76e98e
-
 ### About 
 
 It allows reading and downloading manga from [MangaDex](https://mangadex.org/)  
+
+https://github.com/user-attachments/assets/55cc617c-1e7c-4606-a41f-0c21dc359ae2
 
 
 ### Please Read
