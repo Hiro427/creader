@@ -7,6 +7,7 @@ printf "%s\n" "Cloning Repo..."
 git clone "https://github.com/Hiro427/creader.git"
 
 cd "creader" || exit
+chmod +x "creader.sh"
 
 printf "\n%s\n" "Starting Installation..."
 
