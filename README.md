@@ -91,34 +91,25 @@ m        - Main Menu
 
     You can read through the script yourself and copy and make the commands, or follow below.
     
-    Make Directories 
-
-    cd ~/.config && mkdir creader 
+    cd ~/.config && mkdir creader #make creader directory in .config directory
 
     #make directories, be sure to check spelling, these directories are coded in the main script
     mkdir active/
     mkdir sessions/
     mkdir tmp/ 
 
-    #go home 
-    `cd`
-
     #clone repo 
-    `git clone https://github.com/Hiro427/creader.git` # clone the repo  
-
+    `cd` && `git clone https://github.com/Hiro427/creader.git` # clone the repo  
     `cd creader/`
 
 
     #Make the executable 
-
     `chmod +x creader.sh`
 
     #Copy to PATH
-
     `sudo cp ./creader.sh /usr/local/bin/creader`
 
     #Move the ASCII Header to the config directory 
-
     `cp header.txt ~/.config/creader/`
 
 </details>
