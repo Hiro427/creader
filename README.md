@@ -95,6 +95,11 @@ m        - Main Menu
 
 `export MANGA_DL_DIR="$HOME/Downloads/Manga/"`
 
+#### Dependencies 
+```
+chafa gum awk cut sed file find grep tput tr jq sort
+```
+
 #### There are two ways to install, via the script and manually
 
 <details>
