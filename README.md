@@ -2,11 +2,8 @@
 
 It allows reading and downloading manga from [MangaDex](https://mangadex.org/)  
 
-<details>
-    <summary>Short Demo Vid</summary>
-    https://github.com/user-attachments/assets/55cc617c-1e7c-4606-a41f-0c21dc359ae2
+https://github.com/user-attachments/assets/55cc617c-1e7c-4606-a41f-0c21dc359ae2
 
-</details>
 
 
 ### Please Read
