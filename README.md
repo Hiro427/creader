@@ -1,9 +1,9 @@
-# About 
+### About 
 
 I wrote this project to learn Bash, it allows the reading downloaded manga from [MangaDex](https://mangadex.org/)  
 
 
-# Please Read
+### Please Read
 
 **As of February 8th, 2025**  
 
@@ -21,12 +21,14 @@ Keymaps situation is far from perfect but
 - Save Reading Sessions 
 
 
-# Keymaps/Navigation 
+### Keymaps/Navigation 
 
 In some states of the app Ctrl+C works correctly in only in some cases, I think it has to do with gum. As a result I've added in options to gum menus for Exiting and Going Back. 
 
-#### While Reading Manga
+<details>
+<summary>While Reading Manga</summary>
 
+```
 q/Ctrl+c - Quit/Exit 
 j/down   - next page 
 k/up     - previous page 
@@ -36,9 +38,11 @@ r        - load saved sessions menu
 s        - save current reading session
 m        - go back to main menu
 b        - go back to chapter selection for current manga
+```
+</details>
 
-
-#### Manga Info Preview Page
+<details>
+<summary>Manga Info Preview PageM</summary>
 
 **This is shown when selecting manga to download** 
 
@@ -48,14 +52,18 @@ b        - back to manga selection menu
 enter    - selects the manga 
 any key  - returns to main menu
 ```
+</details>
 
-#### When passing a .cbz file as an argument 
+<details>
+<summary>When passing a .cbz file as an argument</summary>
+
+```
 j/down   - next page 
 k/up     - previous page 
 q/ctrl+c - Quit/Exit
 m        - Main Menu
-
-
+```
+</details>
 
 
 
