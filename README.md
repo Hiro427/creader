@@ -10,7 +10,7 @@ https://github.com/user-attachments/assets/55cc617c-1e7c-4606-a41f-0c21dc359ae2
 
 **As of February 8th, 2025**  
 
-I wrote this project to learn Bash using only Non AI sources, if you see anything I my might've missed or something to improve the script, feel free to open an issue. 
+I wrote this project to learn Bash doing my best to not use chatgpt for anything other than general syntax questions, if you see anything I my might've missed or something to improve the script, feel free to open an issue. 
 
 The Keymaps situation is far from perfect. Sometimes depending on the current application state, Ctrl+c doesn't stop all of the processes. See Keymaps Section for more details. 
 
