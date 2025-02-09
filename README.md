@@ -100,7 +100,7 @@ m        - Main Menu
 <details>
 <summary>Script</summary>
 
-    Be sure to read the script before running it!
+    Be sure to read the install script before running it!
 
     You will be prompted for sudo access for the last command in the script, to copy the script to your PATH
     
@@ -115,7 +115,7 @@ m        - Main Menu
 <details> 
 <summary>Manual</summary>  
 
-    You can read through the script yourself and copy and make the commands, or follow below.
+    You can read through the script yourself install script yourself and copy the commands, or follow below.
     
     cd ~/.config && mkdir creader #make creader directory in .config directory
 
