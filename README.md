@@ -102,7 +102,10 @@ m        - Main Menu
 
     Be sure to read the script before running it!
 
-    wget "https://raw.githubusercontent.com/Hiro427/creader/refs/heads/main/install.sh"
+    wget "https://raw.githubusercontent.com/Hiro427/creader/refs/heads/main/install.sh" 
+    chmod +x install.sh 
+    ./install.sh
+    
 
 </details>
 
