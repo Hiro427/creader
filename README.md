@@ -22,7 +22,7 @@ I am working on "Live Reading", I'm just a bit burnt out with this project at th
 - Downloading All or Selected Manga 
 - Reading Manga 
 - Save Reading Sessions
-- Reader standalone .cbz files ex. `creader chapter_1.cbz`
+- Read standalone .cbz files ex. `creader chapter_1.cbz`
 
 
 ### Keymaps/Navigation 
