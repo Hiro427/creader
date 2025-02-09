@@ -13,9 +13,7 @@ The Keymaps situation is far from perfect. Sometimes depending on the current ap
 
 Currently Manga can only be read after being downloaded.
 
-I am working on "Live Reading", I'm just a bit burnt out with this project at the moment. ButI'll get on it as soon as possible. 
-
-Keymaps situation is far from perfect but 
+I am working on "Live Reading", I'm just a bit burnt out with this project at the moment. But I'll get on it as soon as possible. 
 
 ### Features 
 - Downloading All or Selected Manga 
@@ -24,6 +22,23 @@ Keymaps situation is far from perfect but
 
 
 ### Keymaps/Navigation 
+
+#### Gum Keymaps
+
+*Gum is used to generate the nicer menus in the script*
+
+
+**NOTE: Gum has its own keymaps that are used, these are builtin and as far as I know they cannot be changed. They are using printed below each menu** 
+
+**Example**
+
+In the Manga Chapter selection menu when selecting what to download:
+
+```
+ctrl+a - select all 
+tab - select specifc entries (use must first use escape to temporarily disable the fuzzy searching before using tab, fuzzy search can be used again after pressing '/') 
+```
+Gum Bindings are already show in each menu, below you will see some of my own binding, my bindings cannot be used in conjuction with gum's bindings or vice versa. I know this maybe confusing but this is the best I could do at the moment, until my rewrite in go (TBD).
 
 Only in some states of the app does Ctrl+C works correctl, I think it has to do with how I'm using gum, but I'm not sure. As a result I've added in options to gum menus for Exiting and Going Back. 
 
@@ -84,7 +99,7 @@ m        - Main Menu
 
     Be sure to read the script before running it!
 
-    `wget "https://raw.githubusercontent.com/Hiro427/creader/refs/heads/main/install.sh"`
+    wget "https://raw.githubusercontent.com/Hiro427/creader/refs/heads/main/install.sh"
 
 </details>
 
