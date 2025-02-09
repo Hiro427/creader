@@ -1,17 +1,19 @@
 ### About 
 
-I wrote this project to learn Bash, it allows the reading downloaded manga from [MangaDex](https://mangadex.org/)  
+It allows reading and downloading manga from [MangaDex](https://mangadex.org/)  
 
 
 ### Please Read
 
 **As of February 8th, 2025**  
 
-I'm still learning all the quirks of Bash, so the Keymaps situation is far from perfect. See Keymaps Section for more details. 
+I wrote this project to learn Bash using only Non AI sources, if you see anything I my might've missed or something to improve the script, feel free to open an issue. 
+
+The Keymaps situation is far from perfect. Sometimes depending on the current application state, Ctrl+c doesn't stop all of the processes. See Keymaps Section for more details. 
 
 Currently Manga can only be read after being downloaded.
 
-I am working on "Live Reading", I'm just a bit burnt out with this project at the moment. 
+I am working on "Live Reading", I'm just a bit burnt out with this project at the moment. ButI'll get on it as soon as possible. 
 
 Keymaps situation is far from perfect but 
 
@@ -23,7 +25,7 @@ Keymaps situation is far from perfect but
 
 ### Keymaps/Navigation 
 
-In some states of the app Ctrl+C works correctly in only in some cases, I think it has to do with gum. As a result I've added in options to gum menus for Exiting and Going Back. 
+Only in some states of the app does Ctrl+C works correctl, I think it has to do with how I'm using gum, but I'm not sure. As a result I've added in options to gum menus for Exiting and Going Back. 
 
 <details>
 <summary>While Reading Manga</summary>
@@ -99,18 +101,18 @@ m        - Main Menu
     mkdir tmp/ 
 
     #clone repo 
-    `cd` && `git clone https://github.com/Hiro427/creader.git` # clone the repo  
+    cd && git clone https://github.com/Hiro427/creader.git
     `cd creader/`
 
 
-    #Make the executable 
-    `chmod +x creader.sh`
+    #Make the script an executable 
+    chmod +x creader.sh
 
-    #Copy to PATH
-    `sudo cp ./creader.sh /usr/local/bin/creader`
+    #Copy script to PATH
+    sudo cp ./creader.sh /usr/local/bin/creader
 
     #Move the ASCII Header to the config directory 
-    `cp header.txt ~/.config/creader/`
+    cp header.txt ~/.config/creader/
 
 </details>
 
