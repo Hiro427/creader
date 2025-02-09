@@ -32,7 +32,7 @@ I am working on "Live Reading", I'm just a bit burnt out with this project at th
 
 
 **NOTE: Gum has its own keymaps that are used, these are builtin and as far as I know they cannot be changed. They are printed below each menu** 
-
+*One import keymapping in Gum, is that escape disables the fuzzy search (Chapter Selection Menu(Reader & Download), Manga Selection Menu(Reader) ) and '/' enables it again. This is useful if you are like me and used to vim keys for navigation. Otherwise your keystrokes register in the fuzzy finder. 
 **Example**
 
 In the Manga Chapter selection menu when selecting what to download:
