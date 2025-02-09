@@ -91,9 +91,9 @@ m        - Main Menu
 
 - This is the location of where the downloaded manga will be stored 
 - Make sure the directory exists
+- Feel free to choose a destination that suits you, below is my personal option
 
-`export MANGA_DL_DIR="$HOME/Downloads/Manga/"` 
-
+`export MANGA_DL_DIR="$HOME/Downloads/Manga/"`
 
 #### There are two ways to install, via the script and manually
 
