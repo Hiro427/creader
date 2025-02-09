@@ -42,11 +42,12 @@ b        - go back to chapter selection for current manga
 
 **This is shown when selecting manga to download** 
 
+```
 q/Ctrl+c - Quit/Exit
 b        - back to manga selection menu 
 enter    - selects the manga 
 any key  - returns to main menu
-
+```
 
 #### When passing a .cbz file as an argument 
 j/down   - next page 
