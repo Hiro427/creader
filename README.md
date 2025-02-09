@@ -28,7 +28,7 @@ I am working on "Live Reading", I'm just a bit burnt out with this project at th
 *Gum is used to generate the nicer menus in the script*
 
 
-**NOTE: Gum has its own keymaps that are used, these are builtin and as far as I know they cannot be changed. They are using printed below each menu** 
+**NOTE: Gum has its own keymaps that are used, these are builtin and as far as I know they cannot be changed. They are printed below each menu** 
 
 **Example**
 
