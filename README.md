@@ -96,6 +96,7 @@ m        - Main Menu
 `export MANGA_DL_DIR="$HOME/Downloads/Manga/"`
 
 #### Dependencies 
+You will need a terminal with image support. The terminal in the demo is WezTerm, I have also tried this successfully on Kitty and Ghostty
 ```
 chafa gum awk cut sed file find grep tput tr jq sort
 ```
