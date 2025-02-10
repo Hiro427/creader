@@ -21,8 +21,8 @@ I am working on "Live Reading", I'm just a bit burnt out with this project at th
 ### Features 
 - Downloading All or Selected Manga 
 - Reading Manga
--     Chapters switch automatically, meaning once you arrive at the end of one chapter and go next, the next chapter begins and vice versa.
--     Chapters must be downloaded FIRST, before reading. Live reading not yet available
+- Chapters switch automatically, meaning once you arrive at the end of one chapter and go next, the next chapter begins and vice versa.
+- Chapters must be downloaded FIRST, before reading. Live reading not yet available
 - Save Reading Sessions
 - Read standalone .cbz files ex. `creader chapter_1.cbz`
 
