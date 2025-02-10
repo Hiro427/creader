@@ -128,7 +128,7 @@ chafa gum awk cut sed file find grep tput tr jq sort
 <details> 
 <summary>Manual</summary>  
 
-    You can read through the script yourself install script yourself and copy the commands, or follow below.
+    You can read through the install script yourself and copy the commands, or follow below.
     
     cd ~/.config && mkdir creader #make creader directory in .config directory
 
