@@ -20,7 +20,9 @@ I am working on "Live Reading", I'm just a bit burnt out with this project at th
 
 ### Features 
 - Downloading All or Selected Manga 
-- Reading Manga 
+- Reading Manga
+-     Chapters switch automatically, meaning once you arrive at the end of one chapter and go next, the next chapter begins and vice versa.
+-     Chapters must be downloaded FIRST, before reading. Live reading not yet available
 - Save Reading Sessions
 - Read standalone .cbz files ex. `creader chapter_1.cbz`
 
@@ -49,6 +51,7 @@ Gum Bindings are already show in each menu, below you will see some of my own bi
 
 Only in some states of the app does Ctrl+C works correctl, I think it has to do with how I'm using gum, but I'm not sure. As a result I've added in options to gum menus for Exiting and Going Back. 
 
+#### Keymaps (not gum)
 <details>
 <summary>While Reading Manga</summary>
 
