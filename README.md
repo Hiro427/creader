@@ -92,6 +92,12 @@ m        - Main Menu
 ```
 </details>
 
+#### Session Management
+
+`creader -cs` Clears all saved sessions
+
+I haven't implemented more features for managing sessions yet, but if you want to delete a specific session, you can go to `~/.config/creader/sessions/` and delete the corresponding .txt file. 
+
 ### Installation 
 
 #### Set Environment Variable 
