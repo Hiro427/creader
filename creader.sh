@@ -99,10 +99,10 @@ start_saved_session() {
             manga_menu
         fi
 
-        rd_page_num=$(grep "Page:" "$SESSION_DIR${selected_sesh}" | cut -d':' -f2)
-        rd_chapter_dir=$(grep "Manga:" "$SESSION_DIR${selected_sesh}" | cut -d':' -f2)
-        rd_ch_index=$(grep "Chapter:" "$SESSION_DIR${selected_sesh}" | cut -d':' -f2)
-        rd_ch_name=$(grep "Name:" "$SESSION_DIR${selected_sesh}" | cut -d':' -f2)
+        rd_page_num=$(grep "Page:" "$SESSION_DIR${selected_sesh}.txt" | cut -d':' -f2)
+        rd_chapter_dir=$(grep "Manga:" "$SESSION_DIR${selected_sesh}.txt" | cut -d':' -f2)
+        rd_ch_index=$(grep "Chapter:" "$SESSION_DIR${selected_sesh}.txt" | cut -d':' -f2)
+        rd_ch_name=$(grep "Name:" "$SESSION_DIR${selected_sesh}.txt" | cut -d':' -f2)
 
         get_ch "$rd_chapter_dir" "$rd_ch_index"
 
