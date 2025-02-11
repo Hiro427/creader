@@ -19,7 +19,7 @@ Currently Manga can only be read after being downloaded.
 I am working on "Live Reading", I'm just a bit burnt out with this project at the moment. But I'll get on it as soon as possible. 
 
 ### Features 
-- Downloading All or Selected Manga 
+- Downloading All or Selected Chapters of Manga (Note: Some popular titles like One Piece are not available on MangaDex)
 - Reading Manga
 - Chapters switch automatically, meaning once you arrive at the end of one chapter and go next, the next chapter begins and vice versa.
 - Chapters must be downloaded FIRST, before reading. Live reading not yet available
