@@ -102,7 +102,7 @@ I haven't implemented more features for managing sessions yet, but if you want t
 
 #### Set Environment Variable 
 
-- This is the location of where the downloaded manga will be stored 
+- This is the location of where the downloaded manga will be stored and where the reader will look to read from. 
 - Make sure the directory exists
 - Feel free to choose a destination that suits you, below is my personal option
 
