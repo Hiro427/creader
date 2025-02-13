@@ -45,7 +45,9 @@ In the Manga Chapter selection menu when selecting what to download:
 
 ```
 ctrl+a - select all 
-tab - select specifc entries (use must first use escape to temporarily disable the fuzzy searching before using tab, fuzzy search can be used again after pressing '/') 
+tab - select specifc entries - 
+      you must first use escape to temporarily disable the fuzzy searching before using tab,
+      fuzzy search can be used again after pressing '/' 
 ```
 Gum Bindings are already show in each menu, below you will see some of my own binding, my bindings cannot be used in conjuction with gum's bindings or vice versa. I know this maybe confusing but this is the best I could do at the moment, until my rewrite in go (TBD).
 
