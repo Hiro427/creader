@@ -106,7 +106,10 @@ start_saved_session() {
 
         get_ch "$rd_chapter_dir" "$rd_ch_index"
 
+        rm "$SESSION_DIR${selected_sesh}.txt"
+
         display_image "$rd_ch_index" "$rd_chapter_dir" "$rd_ch_name" "$rd_page_num"
+
     else 
         clear 
         print_header
@@ -667,7 +670,7 @@ display_image() {
                 cur_ch_index=$((cur_ch_index-1))
                 read_single "$cur_ch_index" "$cur_manga"
                 ;;
-            q|SIGINT) # Quitr 
+            q|SIGINT)
                 clear
                 cleanup
                 exit
