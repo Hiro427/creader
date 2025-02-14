@@ -60,7 +60,9 @@ save_session() {
 
     fmt_manga_name=$(basename "$ses_manga_dir")
 
-    rm "$SESSION_DIR${fmt_manga_name}-${ses_ch_title}.txt" 2> /dev/null/
+    # rm "$SESSION_DIR${fmt_manga_name%.*}" 2> /dev/null/
+    rm -f "$SESSION_DIR/${fmt_manga_name%.*}"* 2>/dev/null
+
 
     {
         echo "Page:$ses_img_index"    
@@ -106,13 +108,12 @@ start_saved_session() {
 
         get_ch "$rd_chapter_dir" "$rd_ch_index"
 
-        rm "$SESSION_DIR${selected_sesh}.txt"
+        # rm "$SESSION_DIR${selected_sesh}.txt"
 
         display_image "$rd_ch_index" "$rd_chapter_dir" "$rd_ch_name" "$rd_page_num"
 
     else 
         clear 
-        print_header
         gum confirm "No Sessions found" --affirmative "Main Menu" --negative "Exit" && manga_menu || exit 0
     fi
 }
@@ -696,9 +697,9 @@ display_image() {
                 start_saved_session
                 ;;
             m)
+                save_session "$image_index" "$cur_manga" "$cur_ch_index" "${chapter_name%.*}"
                 cleanup
                 clear 
-                tput cnorm 
                 manga_menu
                 ;;
 
