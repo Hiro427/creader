@@ -60,6 +60,8 @@ save_session() {
 
     fmt_manga_name=$(basename "$ses_manga_dir")
 
+    rm "$SESSION_DIR${fmt_manga_name}-${ses_ch_title}.txt" 2> /dev/null/
+
     {
         echo "Page:$ses_img_index"    
         echo "Manga:$ses_manga_dir"
@@ -68,9 +70,7 @@ save_session() {
     } >> "$SESSION_DIR${fmt_manga_name}-${ses_ch_title}.txt"
 
     clear
-    print_header
-    gum confirm "Session was Saved" --affirmative "Continue Reading?" --negative "Exit" && return || exit 0
-}
+    }
 
 start_saved_session() {
     local rd_chapter_dir
@@ -672,17 +672,22 @@ display_image() {
                 ;;
             q|SIGINT)
                 clear
+                print_header
+                save_session "$image_index" "$cur_manga" "$cur_ch_index" "${chapter_name%.*}"
                 cleanup
                 exit
                 ;;
             b)
                 clear
-                cleanup
                 print_header
+                save_session "$image_index" "$cur_manga" "$cur_ch_index" "${chapter_name%.*}"
+                cleanup
                 read_single "" "$cur_manga"
                 ;;
             s)
                 save_session "$image_index" "$cur_manga" "$cur_ch_index" "${chapter_name%.*}"
+                print_header 
+                gum confirm "Session was Saved" --affirmative "Continue Reading?" --negative "Exit" && return || exit 0
                 ;;
             r)
                 clear 
