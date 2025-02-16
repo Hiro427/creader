@@ -78,14 +78,14 @@ start_saved_session() {
     local rd_chapter_dir
     local rd_page_num 
     local rd_ch_index
-    local rd_ch_name
     local selected_sesh 
     local sessions=()
+    local fmt_ch_name
 
     if ls "$SESSION_DIR"*txt >/dev/null 2>&1; then 
 
 
-        mapfile -t sessions < <(ls "$SESSION_DIR"/*.txt 2>/dev/null)
+        mapfile -t sessions < <(ls -t "$SESSION_DIR"/*.txt 2>/dev/null)
 
 
         list_sessions=()
@@ -104,13 +104,14 @@ start_saved_session() {
         rd_page_num=$(grep "Page:" "$SESSION_DIR${selected_sesh}.txt" | cut -d':' -f2)
         rd_chapter_dir=$(grep "Manga:" "$SESSION_DIR${selected_sesh}.txt" | cut -d':' -f2)
         rd_ch_index=$(grep "Chapter:" "$SESSION_DIR${selected_sesh}.txt" | cut -d':' -f2)
-        rd_ch_name=$(grep "Name:" "$SESSION_DIR${selected_sesh}.txt" | cut -d':' -f2)
+        fmt_ch_name=$(get_ch "$rd_chapter_dir" "$rd_ch_index")
 
-        get_ch "$rd_chapter_dir" "$rd_ch_index"
 
-        # rm "$SESSION_DIR${selected_sesh}.txt"
+        
 
-        display_image "$rd_ch_index" "$rd_chapter_dir" "$rd_ch_name" "$rd_page_num"
+        rm "$SESSION_DIR${selected_sesh}.txt"
+
+        display_image "$rd_ch_index" "$rd_chapter_dir" "${fmt_ch_name%.cbz}" "$rd_page_num"
 
     else 
         clear 
@@ -674,19 +675,19 @@ display_image() {
             q|SIGINT)
                 clear
                 print_header
-                save_session "$image_index" "$cur_manga" "$cur_ch_index" "${chapter_name%.*}"
+                save_session "$image_index" "$cur_manga" "$cur_ch_index" "${ch_name%.cbz}"
                 cleanup
                 exit
                 ;;
             b)
                 clear
                 print_header
-                save_session "$image_index" "$cur_manga" "$cur_ch_index" "${chapter_name%.*}"
+                save_session "$image_index" "$cur_manga" "$cur_ch_index" "${ch_name%.cbz}"
                 cleanup
                 read_single "" "$cur_manga"
                 ;;
             s)
-                save_session "$image_index" "$cur_manga" "$cur_ch_index" "${chapter_name%.*}"
+                save_session "$image_index" "$cur_manga" "$cur_ch_index" "${ch_name%.cbz}"
                 print_header 
                 gum confirm "Session was Saved" --affirmative "Continue Reading?" --negative "Exit" && return || exit 0
                 ;;
