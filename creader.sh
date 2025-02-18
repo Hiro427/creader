@@ -528,7 +528,7 @@ mgn_download_chapter() {
 
     manga_title=$(curl -s -A "Mozilla/5.0" "$chapter_url" | htmlq -t 'div.panel-breadcrumb a' | sed -n '2p')
     image_urls=$(curl -s -A "Mozilla/5.0" "$chapter_url" | htmlq -a src 'div.container-chapter-reader img')
-    chapter_title=$(curl -s A "Mozilla/5.0" "$chapter_url"| htmlq -t 'div.panel-breadcrumb a' | sed -n '3p')
+    chapter_title=$(curl -s A "Mozilla/5.0" "$chapter_url"| htmlq -t 'div.panel-breadcrumb a' | sed -n '3p' | sed 's/Chapter/Ch./g')
     download_dir="$MANGA_DIR${manga_title}"
 
 
