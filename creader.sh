@@ -37,7 +37,7 @@ clear_reading_sessions() {
 
 trap 'clear_reading_sessions; cleanup; exit' EXIT SIGINT
  
-
+#Formatting 
 c_t() {
     local header_color="$1"
     local header="$2"
@@ -49,7 +49,21 @@ c_t() {
     echo -e "\e[38;2;${a_r};${a_g};${a_b}m${header}\e[0m"
 }
 
+apply_preview_color() {
+    
+    local key=$1 
+    local value=$2
 
+    printf "%s: %s" "$(c_t "$PREVIEW_KEY_COLOR" "$key")" \
+        "$(c_t "$PREVIEW_VALUE_COLOR" "$value")" 
+}
+
+print_header() {
+    c_t "$HEADER_COLOR" "$(cat "$HEADER_DIR")"
+    echo " "
+}
+
+#Session Management
 save_session() {
 
     local ses_img_index=$1
@@ -119,7 +133,9 @@ start_saved_session() {
     fi
 }
 
-download_chapter() {
+
+#All functions related to handling requests from MangaDex 
+mdx_download_chapter() {
 
     local chapter_no=$1 
     local chapter_title=$2 
@@ -161,7 +177,7 @@ download_chapter() {
 
 
 
-get_all_chapters() {
+mdx_get_all_chapters() {
     local sel_manga_id="$1"
     local sel_manga_title="$2"
     local limit=10
@@ -250,7 +266,7 @@ get_all_chapters() {
 
             if [[ "$sel_num" == "$chapter_n" ]]; then 
                 matched_id=$(echo "$ch" | awk -F '~' '{print $1}')
-                download_chapter "$chapter_n" "$chapter_t" "$matched_id" "$sel_manga_title"
+                mdx_download_chapter "$chapter_n" "$chapter_t" "$matched_id" "$sel_manga_title"
                 # break
             fi 
         done 
@@ -263,16 +279,9 @@ get_all_chapters() {
     gum confirm "Download Complete" --affirmative "Main Menu" --negative "Exit" && manga_menu || exit 0 
 }
 
-apply_preview_color() {
-    
-    local key=$1 
-    local value=$2
 
-    printf "%s: %s" "$(c_t "$PREVIEW_KEY_COLOR" "$key")" \
-        "$(c_t "$PREVIEW_VALUE_COLOR" "$value")" 
-}
 
-preview_screen() {
+mdx_preview_screen() {
 
     local manga_id=$1
     local search_query=$2
@@ -432,7 +441,7 @@ preview_screen() {
             b) 
                 clear
                 print_header
-                download_menu "$search_query"
+                mdx_download_menu "$search_query"
                 ;;
             "")  
                 clear
@@ -449,7 +458,7 @@ preview_screen() {
 
 
 
-search_manga() {
+mdx_search_manga() {
 
     local search_term=$1  
     local title 
@@ -482,7 +491,7 @@ search_manga() {
 }
 
 
-download_menu() {
+mdx_download_menu() {
 
     local s_query=$1 
     local manga_id
@@ -496,13 +505,13 @@ download_menu() {
     fi  
 
 
-    selection=$(search_manga "$query")
+    selection=$(mdx_search_manga "$query")
     if [[ -n "$selection" ]]; then 
         name=$(echo "$selection" | cut -d'~' -f1)
         manga_id=$(echo "$selection" | cut -d'~' -f2) 
 
-        preview_screen "$manga_id" "$query"
-        get_all_chapters "$manga_id" "$name"
+        mdx_preview_screen "$manga_id" "$query"
+        mdx_get_all_chapters "$manga_id" "$name"
     else
         clear
         manga_menu
@@ -510,10 +519,294 @@ download_menu() {
 
 }
 
+#Handling Manganelo/Manganato requests 
+mgn_download_chapter() {
+
+    local chapter_url=$1 
+    local chapter_title
+    local download_dir
+
+    manga_title=$(curl -s -A "Mozilla/5.0" "$chapter_url" | htmlq -t 'div.panel-breadcrumb a' | sed -n '2p')
+    image_urls=$(curl -s -A "Mozilla/5.0" "$chapter_url" | htmlq -a src 'div.container-chapter-reader img')
+    chapter_title=$(curl -s A "Mozilla/5.0" "$chapter_url"| htmlq -t 'div.panel-breadcrumb a' | sed -n '3p')
+    download_dir="$MANGA_DIR${manga_title}"
+
+
+    mkdir -p "$download_dir"
+
+
+
+    mapfile -t images < <(printf "%s\n" "$image_urls")
+
+    cd "$download_dir/" || exit 
+    index=1
+    for image in "${images[@]}"; do 
+        curl -s -A "Mozilla/5.0" -e "$chapter_url" -o "image-${index}.jpg" "$image"
+        sleep 0.3 #respect ratelimit 
+        ((index ++))
+    done
+
+    find . -maxdepth 1 -type f \( -iname "*.jpg" -o -iname "*.png" \) | sort -V | zip -j "${chapter_title}.cbz" -@ >/dev/null 2>&1
+
+    rm "$download_dir/"*.jpg >/dev/null 2>&1
+    rm "$download_dir/"*.png >/dev/null 2>&1
+    rm "$download_dir/"*.gif >/dev/null 2>&1
+
+
+}
+
+
+
+mgn_get_all_chapters() {
+    local sel_manga_url="$1"
+    local sel_manga_title="$2"
+    local chapter_urls
+    local chapter_titles
+    local manga_page_response
+
+    local track_downloads=0
+    local selected_chapters
+    local sel_ch_titles=()
+
+    manga_page_response=$(curl -s -A "Mozilla/5.0" "$sel_manga_url")
+
+    echo "Fetching Chapter Data"
+
+
+
+    chapter_urls=$(echo "$manga_page_response" | htmlq -a href 'div.panel-story-chapter-list a')
+    IFS=$'\n' read -d '' -r -a chapters_arr <<< "$chapter_urls"
+
+    chapter_titles=$(echo "$manga_page_response" | htmlq -t 'div.panel-story-chapter-list a')
+    IFS=$'\n' read -d '' -r -a chapters_titles_arr <<< "$chapter_titles"
+  
+    echo "Complete"
+
+
+    selected_chapters=$(printf "%s\n" "${chapters_titles_arr[@]}" | gum filter --no-limit)
+
+    IFS=$'\n' read -rd '' -a sel_ch_titles <<< "$selected_chapters"
+    
+    selected_chapter_urls=()
+
+    # Find the index of each selected chapter in the titles array
+    for selected in "${sel_ch_titles[@]}"; do
+        for i in "${!chapters_titles_arr[@]}"; do
+            if [[ "${chapters_titles_arr[i]}" == "$selected" ]]; then
+                selected_chapter_urls+=("${chapters_arr[i]}")
+                break
+            fi
+        done
+    done 
+
+    clear
+    chafa --size=15x15 "${TMP_DIR}manga_cover.webp"
+    tput civis
+
+    for sel in "${selected_chapter_urls[@]}"; do
+
+        tput cup "$((TERM_HEIGHT / 2))" 0
+
+        echo -ne "\rDownloaded ${track_downloads}/${#selected_chapter_urls[@]} Chapters" 
+        mgn_download_chapter "$sel"
+        sleep 0.5
+
+   
+        track_downloads=$((track_downloads + 1))  
+        tput cup "$((TERM_HEIGHT / 2))" 0
+        echo -ne "\rDownloaded ${track_downloads}/${#selected_chapter_urls[@]} Chapters"
+    done 
+    sleep 2 
+    clear
+    gum confirm "Download Complete" --affirmative "Main Menu" --negative "Exit" && manga_menu || exit 0 
+}
+
+
+mgn_preview_screen() {
+
+    local manga_url=$1
+    local search_query=$2
+
+    local manga_page_response
+
+    local cover_response
+    local get_cover_url
+    local cover_art
+    local chapter_urls
+
+    local get_description
+    local get_tags
+    local get_title
+    local get_genre
+    local get_num_chapters
+    local get_status
+    local get_author
+    
+
+    clear
+
+    manga_page_response=$(curl -s -A "Mozilla/5.0" "$manga_url") 
+
+    cover_art=$(echo "$manga_page_response"| htmlq -a src '.panel-story-info img')
+    curl -o "${TMP_DIR}manga_cover.webp" "$cover_art"
+
+    get_author=$(echo "$manga_page_response" | htmlq -t 'td.table-value' | sed -n '3p' | xargs)
+    get_status=$(echo "$manga_page_response" |  htmlq -t 'td.table-value' | sed -n '4p' | xargs)
+    get_tags=$(echo "$manga_page_response" | htmlq -t 'td.table-value a.a-h' | tail -n +5)
+    get_title=$(echo "$manga_page_response" | htmlq -t 'h1')
+
+    chapter_urls=$(echo "$manga_page_response" | htmlq -a href 'div.panel-story-chapter-list a')
+    IFS=$'\n' read -d '' -r -a chapters_array <<< "$chapter_urls"
+
+    get_num_chapters="${#chapters_array[@]}"
+
+
+
+
+
+
+    while true; do 
+
+        tput civis
+        clear
+
+        chafa --size=22x20 "${TMP_DIR}manga_cover.webp"
+        tput civis
+
+
+        tput cup 0 25
+        apply_preview_color "Title" "$get_title"
+
+        tput cup 2 25
+        # echo "Art by: $author_name"
+        apply_preview_color "Story by" "$get_author"
+
+        tput cup 4 25
+        apply_preview_color "Chapters" "$get_num_chapters"
+
+
+        tput cup 6 25 
+        # echo "Status: ${get_status}"
+        apply_preview_color "Status" "$get_status"
+
+        tput cup 8 25
+        c_t "$PREVIEW_KEY_COLOR" "Tags"
+
+        column_position=25
+        line_position=10    
+
+        count=0
+        for tag in $get_tags; do
+            if (( count % 6 == 0 )); then
+                tput cup $line_position $column_position
+                ((line_position++))  
+            fi
+            echo -n "$(c_t "$PREVIEW_VALUE_COLOR" "$tag, ")"
+            ((count++))
+        done
+        
+
+        read -rsn1 key
+
+        if [[ "$key" == $'\e' ]]; then 
+            read -rsn2 key 
+        fi 
+
+        case "$key" in
+            q|SIGINT) # Quitr 
+                clear
+                tput cnorm
+                return 
+                ;;
+            b) 
+                clear
+                print_header
+                mgn_download_menu "$search_query"
+                ;;
+            "")  
+                clear
+                break
+                ;;
+            *)
+                manga_menu
+                ;;
+        esac
+    done
+
+
+}
+
+mgn_search_manga() {
+
+    local search_term=$1  
+    local title 
+    local search_response
+    local title_index
+    local selected_mgn_url
+
+    title=$(echo "$search_term" | tr ' ' '_')
+
+
+    url="https://manganato.com/search/story/${title}"
+    
+    search_response=$(curl -s "$url")
+
+    titles=$(echo "$search_response" | htmlq -t 'div.search-story-item div.item-right h3 a') 
+    title_urls=$(echo "$search_response" | htmlq -a href 'div.search-story-item a.item-img')
+
+    IFS=$'\n' read -d '' -r -a title_array <<< "$titles"
+    IFS=$'\n' read -d '' -r -a title_url_array <<< "$title_urls"
+
+    selected_title=$(printf "Main-Menu\n%s\n" "${titles[@]}" | gum choose)
+    if [[ "$selected_title" == "Main-Menu" ]]; then 
+        return
+    fi
+
+
+    for i in "${!title_array[@]}"; do 
+        if [[ "${title_array[i]}" == "$selected_title" ]]; then 
+            title_index="$i"
+        fi
+    done
+
+    selected_mgn_url="${title_url_array[title_index]}"
+
+    echo "$selected_mgn_url"
+    
+}
+
+mgn_download_menu() {
+
+    local s_query=$1 
+    local manga_id
+    local name
+    local selection 
+
+    if [[ -n "$s_query" ]]; then 
+        query="$s_query"
+    else 
+        query=$(gum input)
+    fi  
+
+
+    selection=$(mgn_search_manga "$query")
+    if [[ -n "$selection" ]]; then 
+        mgn_preview_screen "$selection" "$query"
+        mgn_get_all_chapters "$selection"
+    else
+        clear
+        manga_menu
+    fi
+
+}
+
+
+#Reading Manga (locally)
 get_ch() {
 
     local selected_manga=$1
     local chap_index=$2
+    local selected_index
 
     cd "$selected_manga" || exit 
 
@@ -547,9 +840,6 @@ get_ch() {
     fi
 }
 
-
-
-
 read_single() {
     local index=$1
     local dir=$2
@@ -567,7 +857,7 @@ read_single() {
         display_image "$chapter_index" "$dir" "$chapter_name" " "
     fi 
 
-   }
+}
 
 display_image() {
 
@@ -804,10 +1094,7 @@ menu() {
     }
 
 
-print_header() {
-    c_t "$HEADER_COLOR" "$(cat "$HEADER_DIR")"
-    echo " "
-}
+
 
 manga_menu() {
 
@@ -821,8 +1108,16 @@ manga_menu() {
 
     if [[ "$main_menu_sel" == "Read Manga" ]]; then 
         menu
-    elif [[ "$main_menu_sel" == "Download Manga" ]]; then 
-        download_menu ""
+    elif [[ "$main_menu_sel" == "Download Manga" ]]; then
+        select_source=$(echo -e "MangaDex\nMangaNelo" | gum choose)
+        case "$select_source" in 
+            "MangaDex") 
+                mdx_download_menu ""
+                ;;
+            "MangaNelo")
+                mgn_download_menu ""
+                ;;
+        esac
     elif [[ "$main_menu_sel" == "Reading Sessions" ]]; then 
         start_saved_session
     else 

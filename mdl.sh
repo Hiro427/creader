@@ -1,5 +1,22 @@
 #!/bin/env bash
 
+#
+# titles=$(curl -s "https://manganato.com/search/story/naruto" | htmlq -t 'div.search-story-item div.item-right h3 a')
+# urls=$(curl -s "https://manganato.com/search/story/naruto" | htmlq -a href 'div.search-story-item a.item-img')
+#
+# # Convert lists into arrays
+# IFS=$'\n' read -d '' -r -a title_array <<< "$titles"
+# IFS=$'\n' read -d '' -r -a url_array <<< "$urls"
+#
+# # Print formatted output
+# echo "Search Results:"
+# echo "------------------------------------"
+# for i in "${!title_array[@]}"; do
+#     printf "%2d. %s\n    🔗 %s\n" "$((i+1))" "${title_array[i]}" "${url_array[i]}"
+#     echo "------------------------------------"
+# done
+
+
 #author 
 #curl -s -A "Mozilla/5.0" "https://chapmanganato.to/manga-la988909" | htmlq -t 'td.table-value' | sed -n '3p 
 
