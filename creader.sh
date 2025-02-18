@@ -6,7 +6,7 @@ TMP_DIR="$HOME/.config/creader/tmp/"
 HEADER_DIR="$HOME/.config/creader/header.txt"
 SESSION_DIR="$HOME/.config/creader/sessions/"
 
-TERM_WIDTH=$(tput cols)
+# TERM_WIDTH=$(tput cols)
 TERM_HEIGHT=$(tput lines)
 
 CHAPTER_LABEL="#b4befe"
@@ -16,8 +16,10 @@ HEADER_COLOR="#74c7ec"
 PREVIEW_KEY_COLOR="#89b4fa"
 PREVIEW_VALUE_COLOR="#a6adc8"
 
-CURRENT_INSTANCES=$(ls "$ACTIVE_SESSIONS_DIR" | wc -l) 
 
+
+
+CURRENT_INSTANCES=$(ls "$ACTIVE_SESSIONS_DIR" | wc -l) 
 THIS_INSTANCE=$(("$CURRENT_INSTANCES" + 1))
 DIR="$HOME/.config/creader/active/session-${THIS_INSTANCE}/"
 mkdir -p "$DIR"
@@ -30,7 +32,6 @@ cleanup() {
 
     tput cnorm
 }
-
 clear_reading_sessions() {
     rm -r "$DIR"
 }
@@ -574,10 +575,10 @@ mgn_get_all_chapters() {
 
 
 
-    chapter_urls=$(echo "$manga_page_response" | htmlq -a href 'div.panel-story-chapter-list a')
+    chapter_urls=$(echo "$manga_page_response" | htmlq -a href 'div.panel-story-chapter-list a' | sort -V)
     IFS=$'\n' read -d '' -r -a chapters_arr <<< "$chapter_urls"
 
-    chapter_titles=$(echo "$manga_page_response" | htmlq -t 'div.panel-story-chapter-list a')
+    chapter_titles=$(echo "$manga_page_response" | htmlq -t 'div.panel-story-chapter-list a' | sort -V)
     IFS=$'\n' read -d '' -r -a chapters_titles_arr <<< "$chapter_titles"
   
     echo "Complete"
