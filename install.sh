@@ -12,7 +12,7 @@ chmod +x "creader.sh"
 printf "\n%s\n" "Starting Installation..."
 
 printf "%s\n" "Checking Dependencies..."
-dependencies=(curl chafa gum awk cut sed file find grep tput tr jq sort)
+dependencies=(htmlq curl chafa gum awk cut sed file find grep tput tr jq sort)
 not_installed=()
 for d in "${dependencies[@]}"; do 
     if command -v "$d" >/dev/null 2>&1; then 

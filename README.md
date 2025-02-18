@@ -113,7 +113,7 @@ I haven't implemented more features for managing sessions yet, but if you want t
 #### Dependencies 
 You will need a terminal with image support. The terminal in the demo is WezTerm, I have also tried this successfully on Kitty and Ghostty
 ```
-chafa gum awk cut sed file find grep tput tr jq sort
+htmlq chafa gum awk cut sed file find grep tput tr jq sort
 ```
 
 #### There are two ways to install, via the script and manually
