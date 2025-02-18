@@ -915,11 +915,12 @@ display_image() {
         tput cup 0 "$((term_width / 4 ))"  # Move cursor to center 
         chafa "${images[$image_index]}"
         tput civis 
-        printf "%*s%s-%s %s" "$padding" "" "$col_manga" "$col_ch_name" "$col_pages"
+        printf "%*s%s\n" "$padding" "" "$col_manga" 
+        printf "%*s%s-%s" "$padding" "" "$col_ch_name" "$col_pages"
     else
         chafa "${images[$image_index]}"
         tput civis
-        printf "%s-%s %s" "$col_manga" "$col_ch_name" "$col_pages"
+        printf "%s\n%s %s" "$col_manga" "$col_ch_name" "$col_pages"
     fi
 
         read -rsn1 key  # Read single keypress
