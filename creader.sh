@@ -248,15 +248,9 @@ mdx_get_all_chapters() {
         fi 
 
         clear  
-
-        chafa --size=22x20 "${TMP_DIR}0000_cover_art.png"
-
         tput civis
 
         for ch in "${all_chapter_ids[@]}"; do
-
-
-            tput cup "$((TERM_HEIGHT / 2))" 0
 
             echo -ne "\rDownloaded ${track_downloads}/${#selected_array[@]} Chapters"
    
@@ -272,7 +266,6 @@ mdx_get_all_chapters() {
             fi 
         done 
         track_downloads=$((track_downloads + 1))  
-        tput cup "$((TERM_HEIGHT / 2))" 0
         echo -ne "\rDownloaded ${track_downloads}/${#selected_array[@]} Chapters"
     done 
     sleep 2 
@@ -575,16 +568,16 @@ mgn_get_all_chapters() {
 
 
 
-    chapter_urls=$(echo "$manga_page_response" | htmlq -a href 'div.panel-story-chapter-list a' | sort -V)
+    chapter_urls=$(echo "$manga_page_response" | htmlq -a href 'div.panel-story-chapter-list a' | tac)
     IFS=$'\n' read -d '' -r -a chapters_arr <<< "$chapter_urls"
 
-    chapter_titles=$(echo "$manga_page_response" | htmlq -t 'div.panel-story-chapter-list a' | sort -V)
+    chapter_titles=$(echo "$manga_page_response" | htmlq -t 'div.panel-story-chapter-list a' | tac)
     IFS=$'\n' read -d '' -r -a chapters_titles_arr <<< "$chapter_titles"
   
     echo "Complete"
 
 
-    selected_chapters=$(printf "%s\n" "${chapters_titles_arr[@]}" | gum filter --no-limit)
+    selected_chapters=$(printf "%s\n" "${chapters_titles_arr[@]}" | gum filter --no-limit --no-fuzzy-sort)
 
     IFS=$'\n' read -rd '' -a sel_ch_titles <<< "$selected_chapters"
     
@@ -601,20 +594,15 @@ mgn_get_all_chapters() {
     done 
 
     clear
-    chafa --size=15x15 "${TMP_DIR}manga_cover.webp"
     tput civis
 
     for sel in "${selected_chapter_urls[@]}"; do
 
-        tput cup "$((TERM_HEIGHT / 2))" 0
-
         echo -ne "\rDownloaded ${track_downloads}/${#selected_chapter_urls[@]} Chapters" 
         mgn_download_chapter "$sel"
         sleep 0.5
-
    
         track_downloads=$((track_downloads + 1))  
-        tput cup "$((TERM_HEIGHT / 2))" 0
         echo -ne "\rDownloaded ${track_downloads}/${#selected_chapter_urls[@]} Chapters"
     done 
     sleep 2 
@@ -799,6 +787,15 @@ mgn_download_menu() {
         manga_menu
     fi
 
+}
+
+mgn_download_by_url () {
+
+    local manga_url 
+
+    manga_url=$(gum input --placeholder="Enter Manga URL")
+
+    mgn_get_all_chapters "$(echo "$manga_url" | xargs)"
 }
 
 
@@ -1111,13 +1108,21 @@ manga_menu() {
     if [[ "$main_menu_sel" == "Read Manga" ]]; then 
         menu
     elif [[ "$main_menu_sel" == "Download Manga" ]]; then
-        select_source=$(echo -e "MangaDex\nMangaNelo" | gum choose)
+        select_source=$(echo -e "MangaNato\nMangaDex" | gum choose)
         case "$select_source" in 
-            "MangaDex") 
-                mdx_download_menu ""
+            "MangaNato") 
+                select_dl_method=$(echo -e "Enter Manga URL\nSearch by Title" | gum choose)
+                case "$select_dl_method" in 
+                    "Enter Manga URL")
+                        mgn_download_by_url 
+                        ;;
+                    "Search by Title")
+                        mgn_download_menu ""
+                        ;;
+                esac 
                 ;;
-            "MangaNelo")
-                mgn_download_menu ""
+            "MangaDex")
+                mdx_download_menu ""
                 ;;
         esac
     elif [[ "$main_menu_sel" == "Reading Sessions" ]]; then 
