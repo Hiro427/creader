@@ -140,14 +140,14 @@ chafa gum awk cut sed file find grep tput tr jq sort
     
     cd ~/.config && mkdir creader #make creader directory in .config directory
 
-    #make directories, be sure to check spelling, these directories are coded in the main script
+    #make directories in ~/.config/creader/, be sure to check spelling, these directories are coded in the main script
     mkdir active/
     mkdir sessions/
     mkdir tmp/ 
 
     #clone repo 
     cd && git clone https://github.com/Hiro427/creader.git
-    `cd creader/`
+    cd creader/
 
 
     #Make the script an executable 
