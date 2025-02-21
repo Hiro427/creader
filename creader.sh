@@ -536,7 +536,7 @@ mgn_download_chapter() {
     index=1
     for image in "${images[@]}"; do 
         curl -s -A "Mozilla/5.0" -e "$chapter_url" -o "image-${index}.jpg" "$image"
-        sleep 0.3 #respect ratelimit 
+        sleep 2 #respect ratelimit 
         ((index ++))
     done
 
@@ -600,12 +600,12 @@ mgn_get_all_chapters() {
 
         echo -ne "\rDownloaded ${track_downloads}/${#selected_chapter_urls[@]} Chapters" 
         mgn_download_chapter "$sel"
-        sleep 0.5
+        sleep 5
    
         track_downloads=$((track_downloads + 1))  
         echo -ne "\rDownloaded ${track_downloads}/${#selected_chapter_urls[@]} Chapters"
     done 
-    sleep 2 
+    sleep 1
     clear
     gum confirm "Download Complete" --affirmative "Main Menu" --negative "Exit" && manga_menu || exit 0 
 }
