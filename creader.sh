@@ -520,9 +520,9 @@ mgn_download_chapter() {
     local chapter_title
     local download_dir
 
-    manga_title=$(curl -s -A "Mozilla/5.0" "$chapter_url" | htmlq -t 'div.panel-breadcrumb a' | sed -n '2p')
+    manga_title=$(echo "$chapter_url" | awk -F '/' '{print $5}')
     image_urls=$(curl -s -A "Mozilla/5.0" "$chapter_url" | htmlq -a src 'div.container-chapter-reader img')
-    chapter_title=$(curl -s A "Mozilla/5.0" "$chapter_url"| htmlq -t 'div.panel-breadcrumb a' | sed -n '3p' | sed 's/Chapter/Ch./g')
+    chapter_title=$(printf "Ch.%s" "$(echo "$chapter_url" | awk -F '/' '{print $NF}' | cut -d'-' -f2)")
     download_dir="$MANGA_DIR${manga_title}"
 
 
@@ -535,12 +535,12 @@ mgn_download_chapter() {
     cd "$download_dir/" || exit 
     index=1
     for image in "${images[@]}"; do 
-        curl -s -A "Mozilla/5.0" -e "$chapter_url" -o "image-${index}.jpg" "$image"
+        curl -s -A "Mozilla/5.0" -e "$chapter_url" -o "image-${index}.webp" "$image"
         sleep 2 #respect ratelimit 
         ((index ++))
     done
 
-    find . -maxdepth 1 -type f \( -iname "*.jpg" -o -iname "*.png" \) | sort -V | zip -j "${chapter_title}.cbz" -@ >/dev/null 2>&1
+    find . -maxdepth 1 -type f \( -iname "*.jpg" -o -iname "*.png" -o -iname "*.webp" \) | sort -V | zip -j "${chapter_title}.cbz" -@ >/dev/null 2>&1
 
     rm "$download_dir/"*.jpg >/dev/null 2>&1
     rm "$download_dir/"*.png >/dev/null 2>&1
@@ -568,10 +568,10 @@ mgn_get_all_chapters() {
 
 
 
-    chapter_urls=$(echo "$manga_page_response" | htmlq -a href 'div.panel-story-chapter-list a' | tac)
+    chapter_urls=$(echo "$manga_page_response" | htmlq -a href 'div.chapter div.row a' | tac)
     IFS=$'\n' read -d '' -r -a chapters_arr <<< "$chapter_urls"
 
-    chapter_titles=$(echo "$manga_page_response" | htmlq -t 'div.panel-story-chapter-list a' | tac)
+    chapter_titles=$(echo "$manga_page_response" | htmlq -t 'div.chapter div.row a'| tac)
     IFS=$'\n' read -d '' -r -a chapters_titles_arr <<< "$chapter_titles"
   
     echo "Complete"
@@ -736,12 +736,12 @@ mgn_search_manga() {
     title=$(echo "$search_term" | tr ' ' '_')
 
 
-    url="https://manganato.com/search/story/${title}"
+    url="https://nelomanga.com/search/story/${title}"
     
     search_response=$(curl -s "$url")
 
-    titles=$(echo "$search_response" | htmlq -t 'div.search-story-item div.item-right h3 a') 
-    title_urls=$(echo "$search_response" | htmlq -a href 'div.search-story-item a.item-img')
+    titles=$(echo "$search_response" | htmlq 'div.story_item a img' -a alt )
+    title_urls=$(echo "$search_response" | htmlq '.story_item' -a href)
 
     IFS=$'\n' read -d '' -r -a title_array <<< "$titles"
     IFS=$'\n' read -d '' -r -a title_url_array <<< "$title_urls"
