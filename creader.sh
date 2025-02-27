@@ -161,7 +161,7 @@ mdx_download_chapter() {
 
     for image in "${images[@]}"; do 
         curl -s -o "$image" "${base_url}/data/${hash}/${image}" >/dev/null 2>&1
-        sleep 0.5 #respect ratelimit 
+        sleep 0.7 #respect ratelimit 
     done
 
     cd "$download_dir/" || exit
@@ -536,7 +536,7 @@ mgn_download_chapter() {
     index=1
     for image in "${images[@]}"; do 
         curl -s -A "Mozilla/5.0" -e "$chapter_url" -o "image-${index}.jpg" "$image"
-        sleep 2 #respect ratelimit 
+        sleep 1.7 #respect ratelimit 
         ((index ++))
     done
 
@@ -600,7 +600,7 @@ mgn_get_all_chapters() {
 
         echo -ne "\rDownloaded ${track_downloads}/${#selected_chapter_urls[@]} Chapters" 
         mgn_download_chapter "$sel"
-        sleep 5
+        sleep 3
    
         track_downloads=$((track_downloads + 1))  
         echo -ne "\rDownloaded ${track_downloads}/${#selected_chapter_urls[@]} Chapters"
@@ -911,12 +911,33 @@ display_image() {
 
     if [[ "$width" -lt "$height" &&  "$check_term_size" -lt 15 ]]; then 
         tput cup 0 "$((term_width / 4 ))"  # Move cursor to center 
-        chafa "${images[$image_index]}"
+        # Try to render the image with chafa and capture output and errors
+        chafa_output=$(chafa "${images[$image_index]}" 2>&1)
+
+        # Check if chafa failed by looking for the exact error message
+        if echo "$chafa_output" | grep -q 'chafa: Failed to open'; then
+            # If chafa fails, use viu instead
+            viu "${images[$image_index]}"
+        else
+            # Otherwise, print the chafa output
+            echo "$chafa_output"
+        fi
         tput civis 
         printf "%*s%s\n" "$padding" "" "$col_manga" 
         printf "%*s%s-%s" "$padding" "" "$col_ch_name" "$col_pages"
     else
-        chafa "${images[$image_index]}"
+        # Try to render the image with chafa and capture output and errors
+        chafa_output=$(chafa "${images[$image_index]}" 2>&1)
+
+        # Check if chafa failed by looking for the exact error message
+        if echo "$chafa_output" | grep -q 'chafa: Failed to open'; then
+            # If chafa fails, use viu instead
+            viu "${images[$image_index]}"
+        else
+            # Otherwise, print the chafa output
+            echo "$chafa_output"
+        fi
+
         tput civis
         printf "%s\n%s %s" "$col_manga" "$col_ch_name" "$col_pages"
     fi
