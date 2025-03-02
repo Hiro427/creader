@@ -37,7 +37,8 @@ clear_reading_sessions() {
 }
 
 trap 'clear_reading_sessions; cleanup; exit' EXIT SIGINT
- 
+
+
 #Formatting 
 c_t() {
     local header_color="$1"
@@ -134,7 +135,6 @@ start_saved_session() {
     fi
 }
 
-
 #All functions related to handling requests from MangaDex 
 mdx_download_chapter() {
 
@@ -161,7 +161,7 @@ mdx_download_chapter() {
 
     for image in "${images[@]}"; do 
         curl -s -o "$image" "${base_url}/data/${hash}/${image}" >/dev/null 2>&1
-        sleep 0.7 #respect ratelimit 
+        sleep 1 #respect ratelimit 
     done
 
     cd "$download_dir/" || exit
@@ -213,7 +213,7 @@ mdx_get_all_chapters() {
         if [ "$(echo "$response" | jq '.data | length')" -lt "$limit" ]; then
             break
         fi
-        sleep 0.5 #respect rate limit
+        sleep 1 #respect rate limit
     done
     echo "Complete"
 
@@ -262,13 +262,14 @@ mdx_get_all_chapters() {
             if [[ "$sel_num" == "$chapter_n" ]]; then 
                 matched_id=$(echo "$ch" | awk -F '~' '{print $1}')
                 mdx_download_chapter "$chapter_n" "$chapter_t" "$matched_id" "$sel_manga_title"
+                sleep 2
                 # break
             fi 
         done 
         track_downloads=$((track_downloads + 1))  
         echo -ne "\rDownloaded ${track_downloads}/${#selected_array[@]} Chapters"
     done 
-    sleep 2 
+    sleep 0.5 
     clear
     gum confirm "Download Complete" --affirmative "Main Menu" --negative "Exit" && manga_menu || exit 0 
 }
