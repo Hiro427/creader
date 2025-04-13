@@ -6,7 +6,7 @@ TMP_DIR="$HOME/.config/creader/tmp/"
 HEADER_DIR="$HOME/.config/creader/header.txt"
 SESSION_DIR="$HOME/.config/creader/sessions/"
 
-TERM_WIDTH=$(tput cols)
+# TERM_WIDTH=$(tput cols)
 TERM_HEIGHT=$(tput lines)
 
 CHAPTER_LABEL="#b4befe"
@@ -16,8 +16,10 @@ HEADER_COLOR="#74c7ec"
 PREVIEW_KEY_COLOR="#89b4fa"
 PREVIEW_VALUE_COLOR="#a6adc8"
 
-CURRENT_INSTANCES=$(ls "$ACTIVE_SESSIONS_DIR" | wc -l) 
 
+
+
+CURRENT_INSTANCES=$(ls "$ACTIVE_SESSIONS_DIR" | wc -l) 
 THIS_INSTANCE=$(("$CURRENT_INSTANCES" + 1))
 DIR="$HOME/.config/creader/active/session-${THIS_INSTANCE}/"
 mkdir -p "$DIR"
@@ -30,14 +32,13 @@ cleanup() {
 
     tput cnorm
 }
-
 clear_reading_sessions() {
     rm -r "$DIR"
 }
 
 trap 'clear_reading_sessions; cleanup; exit' EXIT SIGINT
  
-
+#Formatting 
 c_t() {
     local header_color="$1"
     local header="$2"
@@ -49,7 +50,21 @@ c_t() {
     echo -e "\e[38;2;${a_r};${a_g};${a_b}m${header}\e[0m"
 }
 
+apply_preview_color() {
+    
+    local key=$1 
+    local value=$2
 
+    printf "%s: %s" "$(c_t "$PREVIEW_KEY_COLOR" "$key")" \
+        "$(c_t "$PREVIEW_VALUE_COLOR" "$value")" 
+}
+
+print_header() {
+    c_t "$HEADER_COLOR" "$(cat "$HEADER_DIR")"
+    echo " "
+}
+
+#Session Management
 save_session() {
 
     local ses_img_index=$1
@@ -60,6 +75,10 @@ save_session() {
 
     fmt_manga_name=$(basename "$ses_manga_dir")
 
+    # rm "$SESSION_DIR${fmt_manga_name%.*}" 2> /dev/null/
+    rm -f "$SESSION_DIR/${fmt_manga_name%.*}"* 2>/dev/null
+
+
     {
         echo "Page:$ses_img_index"    
         echo "Manga:$ses_manga_dir"
@@ -68,22 +87,20 @@ save_session() {
     } >> "$SESSION_DIR${fmt_manga_name}-${ses_ch_title}.txt"
 
     clear
-    print_header
-    gum confirm "Session was Saved" --affirmative "Continue Reading?" --negative "Exit" && return || exit 0
-}
+    }
 
 start_saved_session() {
     local rd_chapter_dir
     local rd_page_num 
     local rd_ch_index
-    local rd_ch_name
     local selected_sesh 
     local sessions=()
+    local fmt_ch_name
 
     if ls "$SESSION_DIR"*txt >/dev/null 2>&1; then 
 
 
-        mapfile -t sessions < <(ls "$SESSION_DIR"/*.txt 2>/dev/null)
+        mapfile -t sessions < <(ls -t "$SESSION_DIR"/*.txt 2>/dev/null)
 
 
         list_sessions=()
@@ -102,22 +119,24 @@ start_saved_session() {
         rd_page_num=$(grep "Page:" "$SESSION_DIR${selected_sesh}.txt" | cut -d':' -f2)
         rd_chapter_dir=$(grep "Manga:" "$SESSION_DIR${selected_sesh}.txt" | cut -d':' -f2)
         rd_ch_index=$(grep "Chapter:" "$SESSION_DIR${selected_sesh}.txt" | cut -d':' -f2)
-        rd_ch_name=$(grep "Name:" "$SESSION_DIR${selected_sesh}.txt" | cut -d':' -f2)
+        fmt_ch_name=$(get_ch "$rd_chapter_dir" "$rd_ch_index")
 
-        get_ch "$rd_chapter_dir" "$rd_ch_index"
+
+        
 
         rm "$SESSION_DIR${selected_sesh}.txt"
 
-        display_image "$rd_ch_index" "$rd_chapter_dir" "$rd_ch_name" "$rd_page_num"
+        display_image "$rd_ch_index" "$rd_chapter_dir" "${fmt_ch_name%.cbz}" "$rd_page_num"
 
     else 
         clear 
-        print_header
         gum confirm "No Sessions found" --affirmative "Main Menu" --negative "Exit" && manga_menu || exit 0
     fi
 }
 
-download_chapter() {
+
+#All functions related to handling requests from MangaDex 
+mdx_download_chapter() {
 
     local chapter_no=$1 
     local chapter_title=$2 
@@ -159,7 +178,7 @@ download_chapter() {
 
 
 
-get_all_chapters() {
+mdx_get_all_chapters() {
     local sel_manga_id="$1"
     local sel_manga_title="$2"
     local limit=10
@@ -229,15 +248,9 @@ get_all_chapters() {
         fi 
 
         clear  
-
-        chafa --size=22x20 "${TMP_DIR}0000_cover_art.png"
-
         tput civis
 
         for ch in "${all_chapter_ids[@]}"; do
-
-
-            tput cup "$((TERM_HEIGHT / 2))" 0
 
             echo -ne "\rDownloaded ${track_downloads}/${#selected_array[@]} Chapters"
    
@@ -248,12 +261,11 @@ get_all_chapters() {
 
             if [[ "$sel_num" == "$chapter_n" ]]; then 
                 matched_id=$(echo "$ch" | awk -F '~' '{print $1}')
-                download_chapter "$chapter_n" "$chapter_t" "$matched_id" "$sel_manga_title"
+                mdx_download_chapter "$chapter_n" "$chapter_t" "$matched_id" "$sel_manga_title"
                 # break
             fi 
         done 
         track_downloads=$((track_downloads + 1))  
-        tput cup "$((TERM_HEIGHT / 2))" 0
         echo -ne "\rDownloaded ${track_downloads}/${#selected_array[@]} Chapters"
     done 
     sleep 2 
@@ -261,16 +273,9 @@ get_all_chapters() {
     gum confirm "Download Complete" --affirmative "Main Menu" --negative "Exit" && manga_menu || exit 0 
 }
 
-apply_preview_color() {
-    
-    local key=$1 
-    local value=$2
 
-    printf "%s: %s" "$(c_t "$PREVIEW_KEY_COLOR" "$key")" \
-        "$(c_t "$PREVIEW_VALUE_COLOR" "$value")" 
-}
 
-preview_screen() {
+mdx_preview_screen() {
 
     local manga_id=$1
     local search_query=$2
@@ -430,7 +435,7 @@ preview_screen() {
             b) 
                 clear
                 print_header
-                download_menu "$search_query"
+                mdx_download_menu "$search_query"
                 ;;
             "")  
                 clear
@@ -447,7 +452,7 @@ preview_screen() {
 
 
 
-search_manga() {
+mdx_search_manga() {
 
     local search_term=$1  
     local title 
@@ -480,7 +485,7 @@ search_manga() {
 }
 
 
-download_menu() {
+mdx_download_menu() {
 
     local s_query=$1 
     local manga_id
@@ -494,13 +499,13 @@ download_menu() {
     fi  
 
 
-    selection=$(search_manga "$query")
+    selection=$(mdx_search_manga "$query")
     if [[ -n "$selection" ]]; then 
         name=$(echo "$selection" | cut -d'~' -f1)
         manga_id=$(echo "$selection" | cut -d'~' -f2) 
 
-        preview_screen "$manga_id" "$query"
-        get_all_chapters "$manga_id" "$name"
+        mdx_preview_screen "$manga_id" "$query"
+        mdx_get_all_chapters "$manga_id" "$name"
     else
         clear
         manga_menu
@@ -508,10 +513,14 @@ download_menu() {
 
 }
 
+
+
+#Reading Manga (locally)
 get_ch() {
 
     local selected_manga=$1
     local chap_index=$2
+    local selected_index
 
     cd "$selected_manga" || exit 
 
@@ -545,9 +554,6 @@ get_ch() {
     fi
 }
 
-
-
-
 read_single() {
     local index=$1
     local dir=$2
@@ -565,7 +571,7 @@ read_single() {
         display_image "$chapter_index" "$dir" "$chapter_name" " "
     fi 
 
-   }
+}
 
 display_image() {
 
@@ -620,14 +626,38 @@ display_image() {
     
 
     if [[ "$width" -lt "$height" &&  "$check_term_size" -lt 15 ]]; then 
-        tput cup 0 "$((term_width / 4 ))"  # Move cursor to center 
-        chafa "${images[$image_index]}"
+        tput cup 0 "$((term_width / 4 ))"  
+        # Try to render the image with chafa and capture output and errors
+        chafa_output=$(chafa "${images[$image_index]}" 2>&1)
+
+        # Check if chafa fails, swap to viu
+        # I find that viu is generally slower, but for someone reason chafa
+        # doesn't cover all formats, maybe there's a flag I need to use.
+        if echo "$chafa_output" | grep -q 'chafa: Failed to open'; then
+            # If chafa fails, use viu instead
+            viu "${images[$image_index]}"
+        else
+            # Otherwise, print the chafa output
+            # echo "$chafa_output"
+            chafa "${images[$image_index]}"
+        fi
         tput civis 
-        printf "%*s%s-%s %s" "$padding" "" "$col_manga" "$col_ch_name" "$col_pages"
+        # printf "%*s%s\n" "$padding" "" "$col_manga" 
+        printf "%*s%s-%s" "$padding" "" "$col_ch_name" "$col_pages"
     else
-        chafa "${images[$image_index]}"
+        # Try to render the image with chafa and capture output and errors
+        chafa_output=$(chafa "${images[$image_index]}" 2>&1)
+
+        # Check if chafa failed by looking for the exact error message
+        if echo "$chafa_output" | grep -q 'chafa: Failed to open'; then
+            # If chafa fails, use viu instead
+            viu "${images[$image_index]}"
+        else
+            chafa "${images[$image_index]}"
+        fi
+
         tput civis
-        printf "%s-%s %s" "$col_manga" "$col_ch_name" "$col_pages"
+        printf "%s-%s" "$col_ch_name" "$col_pages"
     fi
 
         read -rsn1 key  # Read single keypress
@@ -672,17 +702,22 @@ display_image() {
                 ;;
             q|SIGINT)
                 clear
+                print_header
+                save_session "$image_index" "$cur_manga" "$cur_ch_index" "${ch_name%.cbz}"
                 cleanup
                 exit
                 ;;
             b)
                 clear
-                cleanup
                 print_header
+                save_session "$image_index" "$cur_manga" "$cur_ch_index" "${ch_name%.cbz}"
+                cleanup
                 read_single "" "$cur_manga"
                 ;;
             s)
-                save_session "$image_index" "$cur_manga" "$cur_ch_index" "${chapter_name%.*}"
+                save_session "$image_index" "$cur_manga" "$cur_ch_index" "${ch_name%.cbz}"
+                print_header 
+                gum confirm "Session was Saved" --affirmative "Continue Reading?" --negative "Exit" && return || exit 0
                 ;;
             r)
                 clear 
@@ -691,9 +726,9 @@ display_image() {
                 start_saved_session
                 ;;
             m)
+                save_session "$image_index" "$cur_manga" "$cur_ch_index" "${chapter_name%.*}"
                 cleanup
                 clear 
-                tput cnorm 
                 manga_menu
                 ;;
 
@@ -797,10 +832,7 @@ menu() {
     }
 
 
-print_header() {
-    c_t "$HEADER_COLOR" "$(cat "$HEADER_DIR")"
-    echo " "
-}
+
 
 manga_menu() {
 
@@ -814,8 +846,8 @@ manga_menu() {
 
     if [[ "$main_menu_sel" == "Read Manga" ]]; then 
         menu
-    elif [[ "$main_menu_sel" == "Download Manga" ]]; then 
-        download_menu ""
+    elif [[ "$main_menu_sel" == "Download Manga" ]]; then
+        mdx_download_menu ""
     elif [[ "$main_menu_sel" == "Reading Sessions" ]]; then 
         start_saved_session
     else 
