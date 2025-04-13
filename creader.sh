@@ -626,15 +626,38 @@ display_image() {
     
 
     if [[ "$width" -lt "$height" &&  "$check_term_size" -lt 15 ]]; then 
-        tput cup 0 "$((term_width / 4 ))"  # Move cursor to center 
-        chafa "${images[$image_index]}"
+        tput cup 0 "$((term_width / 4 ))"  
+        # Try to render the image with chafa and capture output and errors
+        chafa_output=$(chafa "${images[$image_index]}" 2>&1)
+
+        # Check if chafa fails, swap to viu
+        # I find that viu is generally slower, but for someone reason chafa
+        # doesn't cover all formats, maybe there's a flag I need to use.
+        if echo "$chafa_output" | grep -q 'chafa: Failed to open'; then
+            # If chafa fails, use viu instead
+            viu "${images[$image_index]}"
+        else
+            # Otherwise, print the chafa output
+            # echo "$chafa_output"
+            chafa "${images[$image_index]}"
+        fi
         tput civis 
-        printf "%*s%s\n" "$padding" "" "$col_manga" 
+        # printf "%*s%s\n" "$padding" "" "$col_manga" 
         printf "%*s%s-%s" "$padding" "" "$col_ch_name" "$col_pages"
     else
-        chafa "${images[$image_index]}"
+        # Try to render the image with chafa and capture output and errors
+        chafa_output=$(chafa "${images[$image_index]}" 2>&1)
+
+        # Check if chafa failed by looking for the exact error message
+        if echo "$chafa_output" | grep -q 'chafa: Failed to open'; then
+            # If chafa fails, use viu instead
+            viu "${images[$image_index]}"
+        else
+            chafa "${images[$image_index]}"
+        fi
+
         tput civis
-        printf "%s\n%s %s" "$col_manga" "$col_ch_name" "$col_pages"
+        printf "%s-%s" "$col_ch_name" "$col_pages"
     fi
 
         read -rsn1 key  # Read single keypress
