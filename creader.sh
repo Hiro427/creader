@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 
 MANGA_DIR="$MANGA_DL_DIR/"
 ACTIVE_SESSIONS_DIR="$HOME/.config/creader/active/"
