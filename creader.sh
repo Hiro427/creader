@@ -16,19 +16,15 @@ HEADER_COLOR="#74c7ec"
 PREVIEW_KEY_COLOR="#89b4fa"
 PREVIEW_VALUE_COLOR="#a6adc8"
 
-
-
-
-CURRENT_INSTANCES=$(ls "$ACTIVE_SESSIONS_DIR" | wc -l) 
+CURRENT_INSTANCES=$(ls "$ACTIVE_SESSIONS_DIR" | wc -l)
 THIS_INSTANCE=$(("$CURRENT_INSTANCES" + 1))
 DIR="$HOME/.config/creader/active/session-${THIS_INSTANCE}/"
 mkdir -p "$DIR"
 
-
 cleanup() {
-    rm "$DIR"*.jpg 1> /dev/null 2>&1 
-    rm "$DIR"*.png 1> /dev/null 2>&1
-    rm "$DIR"*.gif 1> /dev/null 2>&1
+    rm "$DIR"*.jpg 1>/dev/null 2>&1
+    rm "$DIR"*.png 1>/dev/null 2>&1
+    rm "$DIR"*.gif 1>/dev/null 2>&1
 
     tput cnorm
 }
@@ -37,8 +33,8 @@ clear_reading_sessions() {
 }
 
 trap 'clear_reading_sessions; cleanup; exit' EXIT SIGINT
- 
-#Formatting 
+
+#Formatting
 c_t() {
     local header_color="$1"
     local header="$2"
@@ -51,12 +47,12 @@ c_t() {
 }
 
 apply_preview_color() {
-    
-    local key=$1 
+
+    local key=$1
     local value=$2
 
     printf "%s: %s" "$(c_t "$PREVIEW_KEY_COLOR" "$key")" \
-        "$(c_t "$PREVIEW_VALUE_COLOR" "$value")" 
+        "$(c_t "$PREVIEW_VALUE_COLOR" "$value")"
 }
 
 print_header() {
@@ -71,37 +67,34 @@ save_session() {
     local ses_manga_dir=$2
     local ses_ch_index=$3
     local ses_ch_title=$4
-    local fmt_manga_name 
+    local fmt_manga_name
 
     fmt_manga_name=$(basename "$ses_manga_dir")
 
     # rm "$SESSION_DIR${fmt_manga_name%.*}" 2> /dev/null/
     rm -f "$SESSION_DIR/${fmt_manga_name%.*}"* 2>/dev/null
 
-
     {
-        echo "Page:$ses_img_index"    
+        echo "Page:$ses_img_index"
         echo "Manga:$ses_manga_dir"
-        echo "Chapter:$ses_ch_index" 
+        echo "Chapter:$ses_ch_index"
         echo "Name:$ses_ch_title"
-    } >> "$SESSION_DIR${fmt_manga_name}-${ses_ch_title}.txt"
+    } >>"$SESSION_DIR${fmt_manga_name}-${ses_ch_title}.txt"
 
     clear
-    }
+}
 
 start_saved_session() {
     local rd_chapter_dir
-    local rd_page_num 
+    local rd_page_num
     local rd_ch_index
-    local selected_sesh 
+    local selected_sesh
     local sessions=()
     local fmt_ch_name
 
-    if ls "$SESSION_DIR"*txt >/dev/null 2>&1; then 
-
+    if ls "$SESSION_DIR"*txt >/dev/null 2>&1; then
 
         mapfile -t sessions < <(ls -t "$SESSION_DIR"/*.txt 2>/dev/null)
-
 
         list_sessions=()
         for file in "${sessions[@]}"; do
@@ -112,7 +105,7 @@ start_saved_session() {
 
         selected_sesh=$(printf "%s\n" "${list_sessions[@]}" | gum choose)
 
-        if [[ "$selected_sesh" == "Go Back" ]]; then 
+        if [[ "$selected_sesh" == "Go Back" ]]; then
             manga_menu
         fi
 
@@ -121,27 +114,23 @@ start_saved_session() {
         rd_ch_index=$(grep "Chapter:" "$SESSION_DIR${selected_sesh}.txt" | cut -d':' -f2)
         fmt_ch_name=$(get_ch "$rd_chapter_dir" "$rd_ch_index")
 
-
-        
-
         rm "$SESSION_DIR${selected_sesh}.txt"
 
         display_image "$rd_ch_index" "$rd_chapter_dir" "${fmt_ch_name%.cbz}" "$rd_page_num"
 
-    else 
-        clear 
+    else
+        clear
         gum confirm "No Sessions found" --affirmative "Main Menu" --negative "Exit" && manga_menu || exit 0
     fi
 }
 
-
-#All functions related to handling requests from MangaDex 
+#All functions related to handling requests from MangaDex
 mdx_download_chapter() {
 
-    local chapter_no=$1 
-    local chapter_title=$2 
-    local chapter_id=$3 
-    local manga_title=$4 
+    local chapter_no=$1
+    local chapter_title=$2
+    local chapter_id=$3
+    local manga_title=$4
     local download_dir
 
     download_dir="$MANGA_DIR${manga_title}"
@@ -155,28 +144,24 @@ mdx_download_chapter() {
 
     mapfile -t images < <(echo "$resp" | jq -r '.chapter.data[]')
 
-    
-
     cd "$download_dir/" || exit
 
-    for image in "${images[@]}"; do 
+    for image in "${images[@]}"; do
         curl -s -o "$image" "${base_url}/data/${hash}/${image}" >/dev/null 2>&1
-        sleep 0.5 #respect ratelimit 
+        sleep 0.5 #respect ratelimit
     done
 
     cd "$download_dir/" || exit
-    if [[ "$chapter_title" == "Title_Unavailable" ]]; then 
-        find . -maxdepth 1 -type f \( -iname "*.jpg" -o -iname "*.png" \) | sort -V | zip -j "Ch.${chapter_no}.cbz" -@ >/dev/null 2>&1    
-    else 
-        find . -maxdepth 1 -type f \( -iname "*.jpg" -o -iname "*.png" \) | sort -V | zip -j "Ch.${chapter_no}: ${chapter_title}.cbz" -@ >/dev/null 2>&1    
+    if [[ "$chapter_title" == "Title_Unavailable" ]]; then
+        find . -maxdepth 1 -type f \( -iname "*.jpg" -o -iname "*.png" \) | sort -V | zip -j "Ch.${chapter_no}.cbz" -@ >/dev/null 2>&1
+    else
+        find . -maxdepth 1 -type f \( -iname "*.jpg" -o -iname "*.png" \) | sort -V | zip -j "Ch.${chapter_no}: ${chapter_title}.cbz" -@ >/dev/null 2>&1
     fi
     # magick *.{jpg,png} chapter.cbz
     rm "$download_dir/"*.jpg >/dev/null 2>&1
     rm "$download_dir/"*.png >/dev/null 2>&1
-    rm "$download_dir/"*.gif >/dev/null 2>&1  
+    rm "$download_dir/"*.gif >/dev/null 2>&1
 }
-
-
 
 mdx_get_all_chapters() {
     local sel_manga_id="$1"
@@ -184,29 +169,27 @@ mdx_get_all_chapters() {
     local limit=10
     local offset=0
 
-    local no_id_menu=() 
+    local no_id_menu=()
     local track_downloads=0
 
     echo "Fetching Chapter Data"
 
     while true; do
         url="https://api.mangadex.org/manga/${sel_manga_id}/feed?translatedLanguage%5B%5D=en&limit=${limit}&offset=${offset}&order%5Bchapter%5D=asc"
-        
+
         response=$(curl -s "$url")
 
-        if ! echo "$response" | jq '.' > /dev/null 2>&1; then
+        if ! echo "$response" | jq '.' >/dev/null 2>&1; then
             echo "Invalid JSON response from API at offset $offset"
             break
         fi
 
         ids=$(echo "$response" | jq -r '[.data[] | select(.attributes.externalUrl == null)] | unique_by(.attributes.chapter) | .[] | "\(.id)~\(.attributes.title | if . == "" or . == null then "Title_Unavailable" else . end)~\(.attributes.chapter)"')
 
-
         if [ -n "$ids" ]; then
-            IFS=$'\n' read -rd '' -a temp_ids <<< "$ids"
+            IFS=$'\n' read -rd '' -a temp_ids <<<"$ids"
             all_chapter_ids+=("${temp_ids[@]}")
         fi
-
 
         offset=$((offset + limit))
 
@@ -221,59 +204,56 @@ mdx_get_all_chapters() {
     no_id_menu+=("00: Exit")
 
     for ch in "${all_chapter_ids[@]}"; do
-        title_check=$(awk -F '~' '{print $2}' <<< "$ch" | tr -d '[:space:]')
+        title_check=$(awk -F '~' '{print $2}' <<<"$ch" | tr -d '[:space:]')
 
-        if [[ "$title_check" == "Title_Unavailable" ]]; then 
-            no_id_menu+=("$(echo "$ch" | awk -F '~' '{printf "Ch.%s", $3}')") 
+        if [[ "$title_check" == "Title_Unavailable" ]]; then
+            no_id_menu+=("$(echo "$ch" | awk -F '~' '{printf "Ch.%s", $3}')")
         else
-            no_id_menu+=("$(echo "$ch" | awk -F '~' '{printf "Ch.%s: %s", $3, $2}')") 
+            no_id_menu+=("$(echo "$ch" | awk -F '~' '{printf "Ch.%s: %s", $3, $2}')")
         fi
 
     done
 
-        selected_chapters=$(printf "%s\n" "${no_id_menu[@]}" | sort -V | gum filter --no-limit)
+    selected_chapters=$(printf "%s\n" "${no_id_menu[@]}" | sort -V | gum filter --no-limit)
 
-    IFS=$'\n' read -rd '' -a selected_array <<< "$selected_chapters"
+    IFS=$'\n' read -rd '' -a selected_array <<<"$selected_chapters"
 
-    
     for sel in "${selected_array[@]}"; do
-        if [[ "${#selected_array[@]}" == 1 && "${selected_array[0]}" == "00: Main-Menu" ]]; then  
-            clear 
+        if [[ "${#selected_array[@]}" == 1 && "${selected_array[0]}" == "00: Main-Menu" ]]; then
+            clear
             print_header
             manga_menu
-            
-        elif [[ "${#selected_array[@]}" == 1 && "${selected_array[0]}" == "00: Exit" ]]; then 
+
+        elif [[ "${#selected_array[@]}" == 1 && "${selected_array[0]}" == "00: Exit" ]]; then
             clear
             exit 0
-        fi 
+        fi
 
-        clear  
+        clear
         tput civis
 
         for ch in "${all_chapter_ids[@]}"; do
 
             echo -ne "\rDownloaded ${track_downloads}/${#selected_array[@]} Chapters"
-   
+
             chapter_n=$(echo "$ch" | awk -F '~' '{print $3}')
             chapter_t=$(echo "$ch" | awk -F '~' '{print $2}')
 
             sel_num=$(echo "$sel" | cut -d':' -f1 | cut -d'.' -f2 | tr -d ' ')
 
-            if [[ "$sel_num" == "$chapter_n" ]]; then 
+            if [[ "$sel_num" == "$chapter_n" ]]; then
                 matched_id=$(echo "$ch" | awk -F '~' '{print $1}')
                 mdx_download_chapter "$chapter_n" "$chapter_t" "$matched_id" "$sel_manga_title"
                 # break
-            fi 
-        done 
-        track_downloads=$((track_downloads + 1))  
+            fi
+        done
+        track_downloads=$((track_downloads + 1))
         echo -ne "\rDownloaded ${track_downloads}/${#selected_array[@]} Chapters"
-    done 
-    sleep 2 
+    done
+    sleep 2
     clear
-    gum confirm "Download Complete" --affirmative "Main Menu" --negative "Exit" && manga_menu || exit 0 
+    gum confirm "Download Complete" --affirmative "Main Menu" --negative "Exit" && manga_menu || exit 0
 }
-
-
 
 mdx_preview_screen() {
 
@@ -297,44 +277,42 @@ mdx_preview_screen() {
     local latest_ch_resp
 
     local get_status
-    local get_artist_id 
-    local get_author_id 
+    local get_artist_id
+    local get_author_id
     local request_artist
     local request_author
-    
 
     clear
 
-    if [[ -z "$manga_id" ]]; then 
+    if [[ -z "$manga_id" ]]; then
         return
-    fi 
+    fi
 
     get_cover_url="https://api.mangadex.org/manga/${manga_id}?includes[]=cover_art"
 
-    cover_response=$(curl -s "$get_cover_url") 
+    cover_response=$(curl -s "$get_cover_url")
     sleep 0.2
 
-    cover_art=$(echo "$cover_response" | jq -r '.data.relationships[] | select(.type == "cover_art") | .attributes.fileName') 
+    cover_art=$(echo "$cover_response" | jq -r '.data.relationships[] | select(.type == "cover_art") | .attributes.fileName')
 
-    curl -s -o "${TMP_DIR}0000_cover_art.png" "https://uploads.mangadex.org/covers/${manga_id}/${cover_art}" 
+    curl -s -o "${TMP_DIR}0000_cover_art.png" "https://uploads.mangadex.org/covers/${manga_id}/${cover_art}"
     sleep 0.2
 
     get_title=$(echo "$cover_response" | jq -r '.data.attributes.title.en')
     get_description=$(echo "$cover_response" | jq -r '.data.attributes.description.en')
 
-    get_status=$(echo "$cover_response" | jq -r '.data.attributes.status') 
-    if [[ "$get_status" == "completed" ]]; then 
+    get_status=$(echo "$cover_response" | jq -r '.data.attributes.status')
+    if [[ "$get_status" == "completed" ]]; then
         get_volume=$(echo "$cover_response" | jq -r '.data.attributes.lastVolume')
         get_num_chapters=$(echo "$cover_response" | jq -r '.data.attributes.lastChapter')
-    else 
+    else
         get_volume="---"
-        resp_chapters=$(curl -s "https://api.mangadex.org/manga/${manga_id}") 
-        latest_ch_id=$(echo "$resp_chapters"| jq -r '.data.attributes.latestUploadedChapter')
+        resp_chapters=$(curl -s "https://api.mangadex.org/manga/${manga_id}")
+        latest_ch_id=$(echo "$resp_chapters" | jq -r '.data.attributes.latestUploadedChapter')
         latest_ch_resp=$(curl -s "https://api.mangadex.org/chapter/${latest_ch_id}")
         sleep 0.2
         get_num_chapters=$(echo "$latest_ch_resp" | jq -r '.data.attributes.chapter')
-    fi 
-
+    fi
 
     get_pub_year=$(echo "$cover_response" | jq -r '.data.attributes.year')
     get_genre=$(echo "$cover_response" | jq -r '.data.attributes.publicationDemographic')
@@ -342,29 +320,27 @@ mdx_preview_screen() {
 
     get_author_id=$(echo "$cover_response" | jq -r '.data.relationships[] | select(.type == "author") | .id')
 
-    get_artist_id=$(echo "$cover_response" | jq -r '.data.relationships[] | select(.type == "artist") | .id') 
+    get_artist_id=$(echo "$cover_response" | jq -r '.data.relationships[] | select(.type == "artist") | .id')
 
-    if [[ "$get_artist_id" == "$get_author_id" ]]; then 
+    if [[ "$get_artist_id" == "$get_author_id" ]]; then
         request_author=$(curl -s "https://api.mangadex.org/author/${get_author_id}")
-        author_name=$(echo "$request_author" | jq -r '.data.attributes.name') 
+        author_name=$(echo "$request_author" | jq -r '.data.attributes.name')
         artist_name="$author_name"
 
-    else 
+    else
         request_artist=$(curl -s "https://api.mangadex.org/author/${get_artist_id}")
         request_author=$(curl -s "https://api.mangadex.org/author/${get_author_id}")
-        artist_name=$(echo "$request_artist" | jq -r '.data.attributes.name') 
+        artist_name=$(echo "$request_artist" | jq -r '.data.attributes.name')
         author_name=$(echo "$request_author" | jq -r '.data.attributes.name')
-    fi 
+    fi
 
-
-    while true; do 
+    while true; do
 
         tput civis
         clear
 
         chafa --size=22x20 "${TMP_DIR}0000_cover_art.png"
         tput civis
-
 
         tput cup 0 25
         apply_preview_color "Title" "$get_title"
@@ -379,7 +355,7 @@ mdx_preview_screen() {
         tput cup 4 25
         apply_preview_color "Publication Year" "$get_pub_year"
 
-        tput cup 5 25 
+        tput cup 5 25
         apply_preview_color "Genre" "$get_genre"
 
         tput cup 7 25
@@ -389,7 +365,7 @@ mdx_preview_screen() {
         # echo "Volumes: ${get_volume}"
         apply_preview_color "Volumes" "$get_volume"
 
-        tput cup 9 25 
+        tput cup 9 25
         # echo "Status: ${get_status}"
         apply_preview_color "Status" "$get_status"
 
@@ -397,13 +373,13 @@ mdx_preview_screen() {
         c_t "$PREVIEW_KEY_COLOR" "Tags"
 
         column_position=25
-        line_position=12    
+        line_position=12
 
         count=0
         for tag in $get_tags; do
-            if (( count % 6 == 0 )); then
+            if ((count % 6 == 0)); then
                 tput cup $line_position $column_position
-                ((line_position++))  
+                ((line_position++))
             fi
             echo -n "$(c_t "$PREVIEW_VALUE_COLOR" "$tag, ")"
             ((count++))
@@ -411,98 +387,91 @@ mdx_preview_screen() {
 
         echo
 
-        
         tput cup 17 0
 
         c_t "$PREVIEW_KEY_COLOR" "Description"
 
-        tput cup 19 0 
+        tput cup 19 0
 
         c_t "$PREVIEW_VALUE_COLOR" "$get_description" | awk '/^---|^___/{exit} {print}' | fold -s -w 85
 
-        read -rsn1 key
+        read -rsn1 key </dev/tty
 
-        if [[ "$key" == $'\e' ]]; then 
-            read -rsn2 key 
-        fi 
+        if [[ "$key" == $'\e' ]]; then
+            read -rsn2 key </dev/tty
+        fi
 
         case "$key" in
-            q|SIGINT) # Quitr 
-                clear
-                tput cnorm
-                return 
-                ;;
-            b) 
-                clear
-                print_header
-                mdx_download_menu "$search_query"
-                ;;
-            "")  
-                clear
-                break
-                ;;
-            *)
-                manga_menu
-                ;;
+        q | SIGINT) # Quitr
+            clear
+            tput cnorm
+            return
+            ;;
+        b)
+            clear
+            print_header
+            mdx_download_menu "$search_query"
+            ;;
+        "")
+            clear
+            break
+            ;;
+        *)
+            manga_menu
+            ;;
         esac
     done
 
-
 }
-
-
 
 mdx_search_manga() {
 
-    local search_term=$1  
-    local title 
+    local search_term=$1
+    local title
 
     title=$(echo "$search_term" | tr ' ' '+')
 
-
     url="https://api.mangadex.org/manga?title=${title}"
-    
+
     response=$(curl -s "$url")
 
-    choices=$(echo "$response" | jq -r '.data[] | "\(.attributes.title.en)~\(.id)"') 
+    choices=$(echo "$response" | jq -r '.data[] | "\(.attributes.title.en)~\(.id)"')
 
     if [[ -z "$choices" ]]; then
-        return 
+        return
     fi
 
     names=$(echo "$choices" | cut -d'~' -f1)
 
-    selected_name=$(printf "Main-Menu\n%s" "$names" | gum choose) 
+    selected_name=$(printf "Main-Menu\n%s" "$names" | gum choose)
 
-    if [[ "$selected_name" == "Main-Menu" ]]; then 
+    if [[ "$selected_name" == "Main-Menu" ]]; then
         return
     fi
     selected_pair=$(echo "$choices" | grep "^$selected_name~")
     selected_id=$(echo "$selected_pair" | cut -d'~' -f2)
 
     echo "$selected_name~$selected_id"
-    
-}
 
+}
 
 mdx_download_menu() {
 
-    local s_query=$1 
+    local s_query=$1
     local manga_id
     local name
-    local selection 
+    local selection
 
-    if [[ -n "$s_query" ]]; then 
+    if [[ -n "$s_query" ]]; then
         query="$s_query"
-    else 
+    else
         query=$(gum input)
-    fi  
-
+    fi
 
     selection=$(mdx_search_manga "$query")
-    if [[ -n "$selection" ]]; then 
+    if [[ -n "$selection" ]]; then
         name=$(echo "$selection" | cut -d'~' -f1)
-        manga_id=$(echo "$selection" | cut -d'~' -f2) 
+        manga_id=$(echo "$selection" | cut -d'~' -f2)
 
         mdx_preview_screen "$manga_id" "$query"
         mdx_get_all_chapters "$manga_id" "$name"
@@ -513,8 +482,6 @@ mdx_download_menu() {
 
 }
 
-
-
 #Reading Manga (locally)
 get_ch() {
 
@@ -522,22 +489,21 @@ get_ch() {
     local chap_index=$2
     local selected_index
 
-    cd "$selected_manga" || exit 
+    cd "$selected_manga" || exit
 
     mapfile -t chapters < <(ls | sort -V)
 
-    if [[ -n "$chap_index" ]]; then 
-      
-        cd "$selected_manga" || exit 
+    if [[ -n "$chap_index" ]]; then
+
+        cd "$selected_manga" || exit
         unzip "${chapters[chap_index]}" -d "$DIR" >/dev/null 2>&1
 
         echo "${chapters[chap_index]}"
 
-    else 
-        mapfile -t chapters < <(ls | sort -V)  
+    else
+        mapfile -t chapters < <(ls | sort -V)
 
-        selected_ch=$(printf "%s\n" "${chapters[@]}" | gum filter --height 20 --no-fuzzy --placeholder="Searching $(basename "$selected_manga")...") 
-
+        selected_ch=$(printf "%s\n" "${chapters[@]}" | gum filter --height 20 --no-fuzzy --placeholder="Searching $(basename "$selected_manga")...")
 
         for i in "${!chapters[@]}"; do
             if [[ "${chapters[i]}" == "$selected_ch" ]]; then
@@ -546,7 +512,7 @@ get_ch() {
             fi
         done
 
-        cd "$selected_manga" || exit 
+        cd "$selected_manga" || exit
         unzip "${chapters[selected_index]}" -d "$DIR" >/dev/null 2>&1
 
         echo "$selected_index*${chapters[selected_index]}"
@@ -564,190 +530,180 @@ read_single() {
     if [[ -n "$index" ]]; then
         chapter_name=$(get_ch "$dir" "$index")
         display_image "$index" "$dir" "$chapter_name" " "
-    else 
+    else
         chap_info=$(get_ch "$dir")
         chapter_index=$(echo "$chap_info" | awk -F '*' '{print $1}')
         chapter_name=$(echo "$chap_info" | awk -F '*' '{print $2}')
         display_image "$chapter_index" "$dir" "$chapter_name" " "
-    fi 
+    fi
 
 }
 
 display_image() {
 
-    local cur_ch_index=$1 
+    local cur_ch_index=$1
     local cur_manga=$2
     local ch_name=$3
     local image_ind=$4
 
-
-    local width 
-    local height 
-    local check_term_size 
-    local padding 
-    local term_width 
-    local term_height 
+    local width
+    local height
+    local check_term_size
+    local padding
+    local term_width
+    local term_height
     local dimensions
 
     local col_pages
     local col_ch_name
     local col_manga
 
-
     cd "$DIR" || exit
 
     mapfile -t images < <(ls *.jpg *.png | sort -V)
 
-
-    if [[ -n "$image_ind" ]]; then 
-       image_index="$image_ind"
-    else 
+    if [[ -n "$image_ind" ]]; then
+        image_index="$image_ind"
+    else
         image_index=0
     fi
 
+    while true; do
+        clear
 
-    while true; do 
+        dimensions=$(file "${images[image_index]}" | grep -Eo "[[:digit:]]+ *x *[[:digit:]]+" | tail -n 1)
+        width=$(echo "$dimensions" | cut -d 'x' -f1 | tr -d '[:space:]')
+        height=$(echo "$dimensions" | cut -d 'x' -f2 | tr -d '[:space:]')
+        term_width=$(tput cols)
+        term_height=$(tput lines)
 
-    clear
-    dimensions=$(file "${images[image_index]}" | grep -Eo "[[:digit:]]+ *x *[[:digit:]]+" | tail -n 1)
-    width=$(echo "$dimensions" | cut -d 'x' -f1 | tr -d '[:space:]')
-    height=$(echo "$dimensions" | cut -d 'x' -f2 | tr -d '[:space:]')
-    term_width=$(tput cols)
-    term_height=$(tput lines)
+        col_manga=$(c_t "$MANGA_LABEL" "$(basename "$cur_manga")")
+        col_ch_name=$(c_t "$CHAPTER_LABEL" "${ch_name%.cbz}")
+        col_pages=$(c_t "$PAGES_LABEL" "($((image_index + 1))/${#images[@]})")
+        padding=$((term_width / 4))
 
+        check_term_size=$((term_height - padding))
 
-    col_manga=$(c_t "$MANGA_LABEL" "$(basename "$cur_manga")")
-    col_ch_name=$(c_t "$CHAPTER_LABEL" "${ch_name%.cbz}")
-    col_pages=$(c_t "$PAGES_LABEL" "($((image_index + 1))/${#images[@]})")
-    padding=$((term_width / 4))
+        if [[ "$width" -lt "$height" && "$check_term_size" -lt 15 ]]; then
+            tput cup 0 "$((term_width / 4))"
+            # Try to render the image with chafa and capture output and errors
+            chafa_output=$(chafa "${images[$image_index]}" 2>&1)
 
-
-    check_term_size=$((term_height - padding))
-    
-
-    if [[ "$width" -lt "$height" &&  "$check_term_size" -lt 15 ]]; then 
-        tput cup 0 "$((term_width / 4 ))"  
-        # Try to render the image with chafa and capture output and errors
-        chafa_output=$(chafa "${images[$image_index]}" 2>&1)
-
-        # Check if chafa fails, swap to viu
-        # I find that viu is generally slower, but for someone reason chafa
-        # doesn't cover all formats, maybe there's a flag I need to use.
-        if echo "$chafa_output" | grep -q 'chafa: Failed to open'; then
-            # If chafa fails, use viu instead
-            viu "${images[$image_index]}"
+            # Check if chafa fails, swap to viu
+            # I find that viu is generally slower, but for someone reason chafa
+            # doesn't cover all formats, maybe there's a flag I need to use.
+            if echo "$chafa_output" | grep -q 'chafa: Failed to open'; then
+                # If chafa fails, use viu instead
+                viu "${images[$image_index]}"
+            else
+                # Otherwise, print the chafa output
+                # echo "$chafa_output"
+                chafa "${images[$image_index]}"
+            fi
+            tput civis
+            # printf "%*s%s\n" "$padding" "" "$col_manga"
+            printf "%*s%s-%s" "$padding" "" "$col_ch_name" "$col_pages"
         else
-            # Otherwise, print the chafa output
-            # echo "$chafa_output"
-            chafa "${images[$image_index]}"
+            # Try to render the image with chafa and capture output and errors
+            chafa_output=$(chafa "${images[$image_index]}" 2>&1)
+
+            # Check if chafa failed by looking for the exact error message
+            if echo "$chafa_output" | grep -q 'chafa: Failed to open'; then
+                # If chafa fails, use viu instead
+                viu "${images[$image_index]}"
+            else
+                chafa "${images[$image_index]}"
+            fi
+
+            tput civis
+            printf "%s-%s" "$col_ch_name" "$col_pages"
         fi
-        tput civis 
-        # printf "%*s%s\n" "$padding" "" "$col_manga" 
-        printf "%*s%s-%s" "$padding" "" "$col_ch_name" "$col_pages"
-    else
-        # Try to render the image with chafa and capture output and errors
-        chafa_output=$(chafa "${images[$image_index]}" 2>&1)
+        read -rsn1 key </dev/tty
 
-        # Check if chafa failed by looking for the exact error message
-        if echo "$chafa_output" | grep -q 'chafa: Failed to open'; then
-            # If chafa fails, use viu instead
-            viu "${images[$image_index]}"
-        else
-            chafa "${images[$image_index]}"
+        if [[ "$key" == $'\e' ]]; then
+            read -rsn2 key </dev/tty
         fi
-
-        tput civis
-        printf "%s-%s" "$col_ch_name" "$col_pages"
-    fi
-
-        read -rsn1 key  # Read single keypress
-
-        if [[ "$key" == $'\e' ]]; then 
-            read -rsn2 key 
-        fi 
 
         case "$key" in
-            k | '[A') 
+        k | '[A')
 
-                if [[ $image_index -eq "0" ]]; then 
-                    cleanup 
-                    clear 
-                    cur_ch_index=$((cur_ch_index-1))
-                    read_single "$cur_ch_index" "$cur_manga"
-                else 
-                    ((image_index = (image_index - 1 + ${#images[@]}) % ${#images[@]}))
-                fi 
-                                ;;
-            j | '[B') 
-                if [[ $image_index -eq $((${#images[@]} - 1)) ]]; then 
-                    cleanup 
-                    clear 
-                    cur_ch_index=$((cur_ch_index+1))
-                    read_single "$cur_ch_index" "$cur_manga"
-                else 
-                    ((image_index = (image_index + 1) % ${#images[@]}))
-                fi 
-                ;;
-            l | '[C')
-                cleanup 
-                clear 
-                cur_ch_index=$((cur_ch_index+1))
-                read_single "$cur_ch_index" "$cur_manga"
-                ;;
-            h | '[D') 
-                cleanup 
-                clear 
-                cur_ch_index=$((cur_ch_index-1))
-                read_single "$cur_ch_index" "$cur_manga"
-                ;;
-            q|SIGINT)
+            if [[ $image_index -eq "0" ]]; then
+                cleanup
                 clear
-                print_header
-                save_session "$image_index" "$cur_manga" "$cur_ch_index" "${ch_name%.cbz}"
+                cur_ch_index=$((cur_ch_index - 1))
+                read_single "$cur_ch_index" "$cur_manga"
+            else
+                ((image_index = (image_index - 1 + ${#images[@]}) % ${#images[@]}))
+            fi
+            ;;
+        j | '[B')
+            if [[ $image_index -eq $((${#images[@]} - 1)) ]]; then
                 cleanup
-                exit
-                ;;
-            b)
                 clear
-                print_header
-                save_session "$image_index" "$cur_manga" "$cur_ch_index" "${ch_name%.cbz}"
-                cleanup
-                read_single "" "$cur_manga"
-                ;;
-            s)
-                save_session "$image_index" "$cur_manga" "$cur_ch_index" "${ch_name%.cbz}"
-                print_header 
-                gum confirm "Session was Saved" --affirmative "Continue Reading?" --negative "Exit" && return || exit 0
-                ;;
-            r)
-                clear 
-                cleanup 
-                print_header
-                start_saved_session
-                ;;
-            m)
-                save_session "$image_index" "$cur_manga" "$cur_ch_index" "${chapter_name%.*}"
-                cleanup
-                clear 
-                manga_menu
-                ;;
+                cur_ch_index=$((cur_ch_index + 1))
+                read_single "$cur_ch_index" "$cur_manga"
+            else
+                ((image_index = (image_index + 1) % ${#images[@]}))
+            fi
+            ;;
+        l | '[C')
+            cleanup
+            clear
+            cur_ch_index=$((cur_ch_index + 1))
+            read_single "$cur_ch_index" "$cur_manga"
+            ;;
+        h | '[D')
+            cleanup
+            clear
+            cur_ch_index=$((cur_ch_index - 1))
+            read_single "$cur_ch_index" "$cur_manga"
+            ;;
+        q | SIGINT)
+            clear
+            print_header
+            save_session "$image_index" "$cur_manga" "$cur_ch_index" "${ch_name%.cbz}"
+            cleanup
+            exit
+            ;;
+        b)
+            clear
+            print_header
+            save_session "$image_index" "$cur_manga" "$cur_ch_index" "${ch_name%.cbz}"
+            cleanup
+            read_single "" "$cur_manga"
+            ;;
+        s)
+            save_session "$image_index" "$cur_manga" "$cur_ch_index" "${ch_name%.cbz}"
+            print_header
+            gum confirm "Session was Saved" --affirmative "Continue Reading?" --negative "Exit" && return || exit 0
+            ;;
+        r)
+            clear
+            cleanup
+            print_header
+            start_saved_session
+            ;;
+        m)
+            save_session "$image_index" "$cur_manga" "$cur_ch_index" "${chapter_name%.*}"
+            cleanup
+            clear
+            manga_menu
+            ;;
 
         esac
     done
 }
 
-
-
 read_arg_file() {
 
-    local arg_file=$1 
+    local arg_file=$1
 
-    local width 
-    local height 
-    local check_term_size 
-    local padding 
-    local term_width 
-    local term_height 
+    local width
+    local height
+    local check_term_size
+    local padding
+    local term_width
+    local term_height
     local image_index
 
     unzip "$arg_file" -d "$DIR" >/dev/null 2>&1
@@ -758,61 +714,58 @@ read_arg_file() {
 
     image_index=0
 
+    while true; do
+        clear
+        dimensions=$(file "${images[image_index]}" | grep -Eo "[[:digit:]]+ *x *[[:digit:]]+" | tail -n 1)
+        width=$(echo "$dimensions" | cut -d 'x' -f1 | tr -d '[:space:]')
+        height=$(echo "$dimensions" | cut -d 'x' -f2 | tr -d '[:space:]')
+        term_width=$(tput cols)
+        term_height=$(tput lines)
 
-    while true; do 
-    clear
-    dimensions=$(file "${images[image_index]}" | grep -Eo "[[:digit:]]+ *x *[[:digit:]]+" | tail -n 1)
-    width=$(echo "$dimensions" | cut -d 'x' -f1 | tr -d '[:space:]')
-    height=$(echo "$dimensions" | cut -d 'x' -f2 | tr -d '[:space:]')
-    term_width=$(tput cols)
-    term_height=$(tput lines)
+        col_file_name=$(c_t "#b4befe" "${arg_file%.*}")
+        col_pages=$(c_t "#bac2de" "($((image_index + 1))/${#images[@]})")
 
-    col_file_name=$(ct "#b4befe" "${arg_file%.*}")
-    col_pages=$(ct "#bac2de" "($((image_index + 1))/${#images[@]})")
+        padding=$((term_width / 4))
 
-    padding=$((term_width / 4))
+        check_term_size=$((term_height - padding))
 
-
-    check_term_size=$((term_height - padding))
-
-
-    if [[ "$width" -lt "$height" &&  "$check_term_size" -lt 15 ]]; then 
-        tput cup 0 "$((term_width / 4 ))"  # Move cursor to center 
-        chafa "${images[$image_index]}"
-        tput civis 
-        printf "%*s%s-%s" "$padding" "" "$col_file_name" "$col_pages"
-    else
-        chafa "${images[$image_index]}"
-        tput civis
-        printf "%s-%s" "$col_file_name" "$col_pages"
-    fi
+        if [[ "$width" -lt "$height" && "$check_term_size" -lt 15 ]]; then
+            tput cup 0 "$((term_width / 4))" # Move cursor to center
+            chafa "${images[$image_index]}"
+            tput civis
+            printf "%*s%s-%s" "$padding" "" "$col_file_name" "$col_pages"
+        else
+            chafa "${images[$image_index]}"
+            tput civis
+            printf "%s-%s" "$col_file_name" "$col_pages"
+        fi
         # tput home
 
-    # printf "%s - %s %s" "$col_manga" "$col_ch_name" "$col_pages"
-        read -rsn1 key  # Read single keypress
+        # printf "%s - %s %s" "$col_manga" "$col_ch_name" "$col_pages"
+        read -rsn1 key </dev/tty # Read single keypress
 
-        if [[ "$key" == $'\e' ]]; then 
-            read -rsn2 key 
-        fi 
+        if [[ "$key" == $'\e' ]]; then
+            read -rsn2 key </dev/tty
+        fi
 
         case "$key" in
-            k | '[A') 
+        k | '[A')
 
-                ((image_index = (image_index - 1 + ${#images[@]}) % ${#images[@]}))
-                ;;
-            j | '[B') 
-                ((image_index = (image_index + 1) % ${#images[@]}))
-                ;;
-            q|SIGINT) 
-                clear
-                cleanup
-                exit
-                ;;
-            m)
-                clear
-                cleanup
-                manga_menu
-                ;;
+            ((image_index = (image_index - 1 + ${#images[@]}) % ${#images[@]}))
+            ;;
+        j | '[B')
+            ((image_index = (image_index + 1) % ${#images[@]}))
+            ;;
+        q | SIGINT)
+            clear
+            cleanup
+            exit
+            ;;
+        m)
+            clear
+            cleanup
+            manga_menu
+            ;;
 
         esac
     done
@@ -820,19 +773,15 @@ read_arg_file() {
 
 menu() {
 
-
-    choose_dir=$(ls "$MANGA_DIR" | \
-         sort -V |  \
-         gum filter  \
-         --height 20 \
-         --no-fuzzy --placeholder="Searching Manga...")
+    choose_dir=$(ls "$MANGA_DIR" |
+        sort -V |
+        gum filter \
+            --height 20 \
+            --no-fuzzy --placeholder="Searching Manga...")
 
     selected_dir="$MANGA_DIR$choose_dir"
     read_single "" "$selected_dir"
-    }
-
-
-
+}
 
 manga_menu() {
 
@@ -841,41 +790,36 @@ manga_menu() {
     clear
     print_header
 
-
     main_menu_sel=$(echo -e "Read Manga\nDownload Manga\nReading Sessions\nExit" | gum choose)
 
-    if [[ "$main_menu_sel" == "Read Manga" ]]; then 
+    if [[ "$main_menu_sel" == "Read Manga" ]]; then
         menu
     elif [[ "$main_menu_sel" == "Download Manga" ]]; then
         mdx_download_menu ""
-    elif [[ "$main_menu_sel" == "Reading Sessions" ]]; then 
+    elif [[ "$main_menu_sel" == "Reading Sessions" ]]; then
         start_saved_session
-    else 
-        cleanup 
+    else
+        cleanup
         clear
         exit 0
     fi
 }
 
-
-
 if [[ "$#" -eq 1 ]]; then
     arg=$1
-    if [[ "$arg" == "-cs" ]]; then 
+    if [[ "$arg" == "-cs" ]]; then
         rm "$SESSION_DIR"*.txt
         echo "Sessions Cleared"
-    else 
+    else
         extension="${arg##*.}"
-        if [[ "$extension" == "cbz" ]]; then 
+        if [[ "$extension" == "cbz" ]]; then
             read_arg_file "$arg"
-        else 
+        else
             echo "invalid argument, please pass .cbz file"
         fi
     fi
-elif [[ "$#" -gt 1 ]]; then 
+elif [[ "$#" -gt 1 ]]; then
     echo "too many arguments, only 1 is allowed"
-else 
+else
     manga_menu
-fi 
-
-
+fi
