@@ -5,19 +5,6 @@ It allows reading and downloading manga from [MangaDex](https://mangadex.org/)
 https://github.com/user-attachments/assets/55cc617c-1e7c-4606-a41f-0c21dc359ae2
 
 
-
-### Please Read
-
-**As of February 8th, 2025**  
-
-I wrote this project to learn Bash doing my best to not use chatgpt for anything other than general syntax questions, if you see anything I my might've missed or something to improve the script, feel free to open an issue. 
-
-The Keymaps situation is far from perfect. Sometimes depending on the current application state, Ctrl+c doesn't stop all of the processes. See Keymaps Section for more details. 
-
-Currently Manga can only be read after being downloaded.
-
-I am working on "Live Reading", I'm just a bit burnt out with this project at the moment. But I'll get on it as soon as possible. 
-
 ### Features 
 - Downloading All or Selected Chapters of Manga (Note: Some popular titles like One Piece are not available on MangaDex)
 - Reading Manga
